@@ -3,10 +3,6 @@
 var MIN_AVATAR_NUMBER = 1;
 var MAX_AVATAR_NUMBER = 8;
 var TITLE = 'Lorem ipsum dolor sit amet, consectetur';
-var LOCATION = {
-  X: 500,
-  Y: 300
-};
 var PRICE = 9999;
 var PRICE_UNITS = '₽/ночь';
 var TYPE = ['palace', 'flat', 'house', 'bungalo'];
@@ -66,20 +62,35 @@ var getRandomSlice = function (array) {
 };
 
 // Return x coordinate depending on block width
-var xCoordinate = function (block) {
+var getXCoordinate = function (block) {
   var width = block.offsetWidth;
   return getRandomNumber(0, width);
 };
 
+// Return y coordinate in boundaries
+var getYCoordinate = function () {
+  var minCoordinate = 130;
+  var maxCoordinate = 630;
+
+  return getRandomNumber(minCoordinate, maxCoordinate);
+};
+
+
 // Generate single advert object with random data
 var generateAdvert = function (randArray, index) {
+  // get random location on map
+  var locationPoint = {
+    x: getXCoordinate(map),
+    y: getYCoordinate()
+  };
+
   var obj = {
     'author': {
       'avatar': 'img/avatars/user' + '0' + randArray[index] + '.png',
     },
     'offer': {
       'title': TITLE,
-      'address': LOCATION.X + ', ' + LOCATION.Y,
+      'address': locationPoint.x + ', ' + locationPoint.y,
       'price': PRICE,
       'type': getRandomFromArray(TYPE),
       'rooms': getRandomNumber(MIN_ROOMS, MAX_ROOMS),
@@ -91,8 +102,8 @@ var generateAdvert = function (randArray, index) {
       'photos': getRandomSlice(PHOTOS)
     },
     'location': {
-      'x': xCoordinate(map),
-      'y': getRandomNumber(130, 630)
+      'x': locationPoint.x,
+      'y': locationPoint.y
     }
   };
 
@@ -303,21 +314,21 @@ var createCard = function (template, data) {
 var map = document.querySelector('.map');
 // Activate map
 map.classList.remove('map--faded');
+
 // Find pin template
 var pinTemplate = document.querySelector('#pin')
   .content
   .querySelector('.map__pin');
 // Find pin container
 var pinContainer = document.querySelector('.map__pins');
-// Find card template
-var cardTemplate = document.querySelector('#card')
-  .content
-  .querySelector('.map__card');
-
 // Create array with advert objects
 var advertData = generateAdvertArray(ADVERTS_AMOUNT);
 // Set up pins on the map
 fillPinContainer(pinTemplate, advertData, pinContainer);
 
+// Find card template
+var cardTemplate = document.querySelector('#card')
+  .content
+  .querySelector('.map__card');
 // Add card before .map__filters-container block
 map.insertBefore(createCard(cardTemplate, advertData), map.children[1]);
