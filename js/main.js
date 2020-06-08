@@ -3,11 +3,8 @@
 var MIN_AVATAR_NUMBER = 1;
 var MAX_AVATAR_NUMBER = 8;
 var TITLE = 'Lorem ipsum dolor sit amet, consectetur';
-var LOCATION = {
-  X: 500,
-  Y: 300
-};
 var PRICE = 9999;
+var PRICE_UNITS = '₽/ночь';
 var TYPE = ['palace', 'flat', 'house', 'bungalo'];
 var MIN_ROOMS = 1;
 var MAX_ROOMS = 5;
@@ -65,20 +62,35 @@ var getRandomSlice = function (array) {
 };
 
 // Return x coordinate depending on block width
-var xCoordinate = function (block) {
+var getXCoordinate = function (block) {
   var width = block.offsetWidth;
   return getRandomNumber(0, width);
 };
 
+// Return y coordinate in boundaries
+var getYCoordinate = function () {
+  var minCoordinate = 130;
+  var maxCoordinate = 630;
+
+  return getRandomNumber(minCoordinate, maxCoordinate);
+};
+
+
 // Generate single advert object with random data
 var generateAdvert = function (randArray, index) {
+  // get random location on map
+  var locationPoint = {
+    x: getXCoordinate(map),
+    y: getYCoordinate()
+  };
+
   var obj = {
     'author': {
       'avatar': 'img/avatars/user' + '0' + randArray[index] + '.png',
     },
     'offer': {
       'title': TITLE,
-      'address': LOCATION.X + ', ' + LOCATION.Y,
+      'address': locationPoint.x + ', ' + locationPoint.y,
       'price': PRICE,
       'type': getRandomFromArray(TYPE),
       'rooms': getRandomNumber(MIN_ROOMS, MAX_ROOMS),
@@ -90,8 +102,8 @@ var generateAdvert = function (randArray, index) {
       'photos': getRandomSlice(PHOTOS)
     },
     'location': {
-      'x': xCoordinate(map),
-      'y': getRandomNumber(130, 630)
+      'x': locationPoint.x,
+      'y': locationPoint.y
     }
   };
 
@@ -151,10 +163,158 @@ var fillPinContainer = function (template, data, container) {
   return;
 };
 
+// Return fragment with element (by copying child from parent)
+var addCopyElements = function (block, element, data) {
+  var fragment = document.createDocumentFragment();
+
+  for (var i = 0; i < data.length; i++) {
+    // Clone element
+    var elementClone = element.cloneNode(true);
+    // Write src
+    elementClone.src = data[i];
+    // Append to fragment
+    fragment.appendChild(elementClone);
+  }
+  // remove initial template element
+  block.removeChild(element);
+  return fragment;
+};
+
+// Return fragment with element (by creating <li>)
+var createList = function (data) {
+  // Create empty fragment
+  var fragment = document.createDocumentFragment();
+  // Define basic class
+  var basicClass = 'popup__feature';
+
+  // Create New Element
+  var templateElement = document.createElement('li');
+  // Add basic class
+  templateElement.classList.add(basicClass);
+
+  for (var i = 0; i < data.length; i++) {
+    var feature = data[i];
+
+    var newElement = templateElement.cloneNode(true);
+    // Add class modifier
+    newElement.classList.add(basicClass + '--' + feature);
+    newElement.textContent = feature;
+
+    fragment.appendChild(newElement);
+  }
+  return fragment;
+};
+
+// Add simple text from data with checking for existence
+var addTextAndCheck = function (element, textData) {
+  if (textData) {
+    element.textContent = textData;
+  } else {
+    // Hide element
+    element.hidden = true;
+  }
+};
+
+// Translate from english to russian
+var translate = function (origin) {
+  switch (origin) {
+    case 'flat':
+      origin = 'Квартира';
+      break;
+    case 'palace':
+      origin = 'Дворец';
+      break;
+    case 'house':
+      origin = 'Дом';
+      break;
+    case 'bungalo':
+      origin = 'Бунгало';
+      break;
+    default:
+      origin = false;
+      break;
+  }
+  return origin;
+};
+
+// Create card
+var createCard = function (template, data) {
+  var card = template.cloneNode(true);
+  data = data[0];
+
+  // Find elements
+  var title = card.querySelector('.popup__title');
+  var address = card.querySelector('.popup__text--address');
+  var price = card.querySelector('.popup__text--price');
+  var type = card.querySelector('.popup__type');
+  var capacity = card.querySelector('.popup__text--capacity');
+  var time = card.querySelector('.popup__text--time');
+  var featuresContainer = card.querySelector('.popup__features');
+  var description = card.querySelector('.popup__description');
+  var photosContainer = card.querySelector('.popup__photos');
+  var photoItem = photosContainer.querySelector('.popup__photo');
+  var avatar = card.querySelector('.popup__avatar');
+
+  // Add title
+  addTextAndCheck(title, data.offer.title);
+  // Add address
+  addTextAndCheck(address, data.offer.address);
+  // Add price
+  addTextAndCheck(price, data.offer.price);
+  // Add price units
+  price.insertAdjacentHTML('beforeend', ' ' + PRICE_UNITS);
+  // Add type of accommodation
+  addTextAndCheck(type, translate(data.offer.type));
+  // Add description
+  addTextAndCheck(description, data.offer.description);
+  // Add capacity
+  if (data.offer.rooms && data.offer.guests) {
+    capacity.textContent = data.offer.rooms + ' комнаты для ' + data.offer.guests + ' гостей';
+  } else {
+    capacity.hidden = true;
+  }
+  // Add time
+  if (data.offer.checkin && data.offer.checkout) {
+    time.textContent = 'Заезд после ' + data.offer.checkin + ', выезд до ' + data.offer.checkout;
+  } else {
+    time.hidden = true;
+  }
+  // Add features
+  // Clear parent element from <li>
+  featuresContainer.innerHTML = '';
+  if (data.offer.features) {
+    // Append fragment with created <li>
+    featuresContainer.appendChild(createList(data.offer.features));
+  } else {
+    featuresContainer.hidden = true;
+  }
+
+  // Add photos
+  if (data.offer.photos) {
+    // Append photo to container .popup__photos
+    photosContainer.appendChild(addCopyElements(photosContainer, photoItem, data.offer.photos));
+  } else {
+    photosContainer.hidden = true;
+    // img alt can't be hidden if I hide only parent (?)
+    photosContainer.children[0].hidden = true;
+  }
+
+  // Add avatar
+  if (data.author.avatar) {
+    // Append img elements to .popup__photos container
+    avatar.src = data.author.avatar;
+  } else {
+    avatar.hidden = true;
+  }
+
+  return card;
+};
+
 // Find map
 var map = document.querySelector('.map');
 // Activate map
 map.classList.remove('map--faded');
+
 // Find pin template
 var pinTemplate = document.querySelector('#pin')
   .content
@@ -165,3 +325,10 @@ var pinContainer = document.querySelector('.map__pins');
 var advertData = generateAdvertArray(ADVERTS_AMOUNT);
 // Set up pins on the map
 fillPinContainer(pinTemplate, advertData, pinContainer);
+
+// Find card template
+var cardTemplate = document.querySelector('#card')
+  .content
+  .querySelector('.map__card');
+// Add card before .map__filters-container block
+map.insertBefore(createCard(cardTemplate, advertData), map.children[1]);
