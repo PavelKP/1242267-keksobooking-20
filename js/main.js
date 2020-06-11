@@ -238,6 +238,8 @@ var translate = function (origin) {
 };
 
 // Create card
+// ----------------------------eslint-disable ---------------------------
+// eslint-disable-next-line no-unused-vars
 var createCard = function (template, data) {
   var card = template.cloneNode(true);
   data = data[0];
@@ -310,25 +312,164 @@ var createCard = function (template, data) {
   return card;
 };
 
+var disableFromElements = function (form, tagArray, flag) {
+  // check existence of flag
+  if (flag === undefined) {
+    flag = true;
+  }
+  // Define empty array
+  var controlArray = [];
+  // Go throw tagArray
+  for (var i = 0; i < tagArray.length; i++) {
+    // Make array from nodeList
+    var nodeListArray = Array.from(form.querySelectorAll(tagArray[i]));
+    // Add array to controlArray
+    controlArray = controlArray.concat(nodeListArray);
+  }
+
+  // All form elements from controlArray
+  // Disable (flag = true)
+  // Enable (flag = false)
+  for (var j = 0; j < controlArray.length; j++) {
+    controlArray[j].disabled = flag;
+  }
+};
+
+// Show hidden blocks
+var addVisibility = function () {
+  map.classList.remove('map--faded');
+  mainFrom.classList.remove('ad-form--disabled');
+};
+
+// Collect and run all functions to start interface
+var startInterface = function () {
+  // Remove disable attributes from form elements
+  disableFromElements(mainFrom, ['input', 'select', 'textarea', 'button'], false);
+  disableFromElements(mapFilterForm, ['input', 'select'], false);
+  // Remove hiding classes
+  addVisibility();
+
+  // Set up pins on the map
+  fillPinContainer(pinTemplate, advertData, pinContainer);
+  // Add card before .map__filters-container block
+  // map.insertBefore(createCard(cardTemplate, advertData), map.children[1]);
+
+  // Set coordinates value in address input (Sharp pin)
+  // The last argument of getCurrentPosition() is length of sharp tail
+  addressField.value = getCurrentPosition(mainPin, 22);
+};
+
+// Get current Pin position
+var getCurrentPosition = function (pinBlock, sharpTail) {
+  // Get current coordinates (inline left and top properties)
+  var left = pinBlock.style.left;
+  var top = pinBlock.style.top;
+
+  // Convert to number without 'px'
+  left = +left.replace(/px/, '');
+  top = +top.replace(/px/, '');
+  // Count offsets to define center point
+  var leftOffset = pinBlock.offsetWidth / 2;
+  var topOffset;
+  // Check existence of sharp tail
+  if (sharpTail) {
+    // Offset = the whole height + tail
+    topOffset = pinBlock.offsetHeight + sharpTail;
+  } else {
+    // Offset = center
+    topOffset = pinBlock.offsetHeight / 2;
+  }
+
+  // Add offsets and round
+  left = Math.round(left + leftOffset);
+  top = Math.round(top + topOffset);
+
+  return left + ', ' + top;
+};
+
+// Compare two inputs and show error messages
+var compareRoomsAndCapacity = function () {
+
+  if (+roomNumber.value < +capacity.value) {
+    // Set error message
+    roomNumber.setCustomValidity('Количество комнат не может быть меньше числа гостей');
+  } else if (+roomNumber.value === 100 && +capacity.value !== 0) {
+    // Set error message
+    capacity.setCustomValidity('Гостей приглашать запрещено');
+  } else if (+roomNumber.value !== 100 && +capacity.value === 0) {
+    // Set error message
+    roomNumber.setCustomValidity('Выберите не менее 100 комнат');
+  } else {
+    // Unset messages for two inputs
+    capacity.setCustomValidity('');
+    roomNumber.setCustomValidity('');
+  }
+};
+
 // Find map
 var map = document.querySelector('.map');
-// Activate map
-map.classList.remove('map--faded');
-
 // Find pin template
 var pinTemplate = document.querySelector('#pin')
   .content
   .querySelector('.map__pin');
 // Find pin container
 var pinContainer = document.querySelector('.map__pins');
-// Create array with advert objects
-var advertData = generateAdvertArray(ADVERTS_AMOUNT);
-// Set up pins on the map
-fillPinContainer(pinTemplate, advertData, pinContainer);
-
 // Find card template
+// ----------------------------eslint-disable ---------------------------
+// eslint-disable-next-line no-unused-vars
 var cardTemplate = document.querySelector('#card')
   .content
   .querySelector('.map__card');
-// Add card before .map__filters-container block
-map.insertBefore(createCard(cardTemplate, advertData), map.children[1]);
+// find form for adding new advert
+var mainFrom = document.querySelector('.ad-form');
+// find filter in map
+var mapFilterForm = document.querySelector('.map__filters');
+// Find map pin
+var mainPin = document.querySelector('.map__pin--main');
+// Find address input
+var addressField = mainFrom.querySelector('#address');
+// Find room number
+var roomNumber = mainFrom.querySelector('#room_number');
+// Find room capacity
+var capacity = mainFrom.querySelector('#capacity');
+// Submit form button
+var submit = mainFrom.querySelector('.ad-form__submit');
+
+// Set default position of map pin in address input (Round pin)
+addressField.value = getCurrentPosition(mainPin);
+// Create array with advert objects
+var advertData = generateAdvertArray(ADVERTS_AMOUNT);
+// Disable form elements for adding new advert
+disableFromElements(mainFrom, ['input', 'select', 'textarea', 'button']);
+// Disable form elements in filter
+disableFromElements(mapFilterForm, ['input', 'select']);
+
+// Start interface when click on "maffin"
+mainPin.addEventListener('mousedown', function (evt) {
+  if (evt.button === 0) {
+    startInterface();
+  }
+});
+
+// Start interface on press "Enter"
+mainPin.addEventListener('keydown', function (evt) {
+  if (evt.keyCode === 13) {
+    startInterface();
+  }
+});
+
+// If change room number check condition
+roomNumber.addEventListener('change', function () {
+  compareRoomsAndCapacity();
+});
+
+// If change capacity check condition
+capacity.addEventListener('change', function () {
+  compareRoomsAndCapacity();
+});
+
+// It is needed if we don't change any select (roomNumber, capacity)
+// and submit form
+submit.addEventListener('click', function () {
+  compareRoomsAndCapacity(roomNumber);
+});
