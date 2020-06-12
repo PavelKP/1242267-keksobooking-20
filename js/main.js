@@ -145,6 +145,8 @@ var createPin = function (template, data, i) {
   pinElement.style.top = data[i].location.y + countOffset('y') + 'px';
   img.src = data[i].author.avatar;
   img.alt = data[i].offer.title;
+  // Set ID fto bound Pin element and data
+  pinElement.setAttribute('data-id', i);
 
   return pinElement;
 };
@@ -238,11 +240,8 @@ var translate = function (origin) {
 };
 
 // Create card
-// ----------------------------eslint-disable ---------------------------
-// eslint-disable-next-line no-unused-vars
 var createCard = function (template, data) {
   var card = template.cloneNode(true);
-  data = data[0];
 
   // Find elements
   var title = card.querySelector('.popup__title');
@@ -351,8 +350,6 @@ var startInterface = function () {
 
   // Set up pins on the map
   fillPinContainer(pinTemplate, advertData, pinContainer);
-  // Add card before .map__filters-container block
-  // map.insertBefore(createCard(cardTemplate, advertData), map.children[1]);
 
   // Set coordinates value in address input (Sharp pin)
   // The last argument of getCurrentPosition() is length of sharp tail
@@ -406,6 +403,58 @@ var compareRoomsAndCapacity = function () {
   }
 };
 
+// Close popup
+var closePopup = function () {
+  // Find actual popup element
+  var popup = map.querySelector('.map__card');
+  // Hide card
+  popup.hidden = true;
+  // Remove ESC listener from document
+  document.removeEventListener('keydown', onPopupEscPress);
+};
+
+// Callback to invoke closePopup() on ESC down
+var onPopupEscPress = function (evt) {
+  if (evt.keyCode === 27) {
+    evt.preventDefault();
+    closePopup();
+  }
+};
+
+// Show card - fetch card from array by id, put it in HTML, add listeners
+var showCard = function (evt) {
+  // Catch click on img (not in main pin)
+  var id;
+  if (evt.target && evt.target.matches('.map__pin:not(.map__pin--main) img')) {
+    // Find id in parent element
+    id = evt.target.parentNode.dataset.id;
+    // Catch click on button (not in main pin)
+  } else if (evt.target && evt.target.matches('.map__pin:not(.map__pin--main)')) {
+    // Find id in target element
+    id = evt.target.dataset.id;
+  }
+
+  // Find a temporary element or previous created card
+  var previous = map.querySelector('.map__card');
+  // Check existence of id
+  // If we click on pin--main, id will be empty
+  if (id) {
+    // Add card before .map__filters-container block
+    map.replaceChild(createCard(cardTemplate, advertData[id]), previous);
+
+    // Find popup close button
+    var popupCloseButton = map.querySelector('.popup__close');
+
+    // Add listener to close popup when click on button "X"
+    popupCloseButton.addEventListener('click', function () {
+      closePopup();
+    });
+
+    // Add listener to run callback on any key down (ESC close)
+    document.addEventListener('keydown', onPopupEscPress);
+  }
+};
+
 // Find map
 var map = document.querySelector('.map');
 // Find pin template
@@ -415,14 +464,12 @@ var pinTemplate = document.querySelector('#pin')
 // Find pin container
 var pinContainer = document.querySelector('.map__pins');
 // Find card template
-// ----------------------------eslint-disable ---------------------------
-// eslint-disable-next-line no-unused-vars
 var cardTemplate = document.querySelector('#card')
   .content
   .querySelector('.map__card');
-// find form for adding new advert
+// Find form for adding new advert
 var mainFrom = document.querySelector('.ad-form');
-// find filter in map
+// Find filter in map
 var mapFilterForm = document.querySelector('.map__filters');
 // Find map pin
 var mainPin = document.querySelector('.map__pin--main');
@@ -432,8 +479,9 @@ var addressField = mainFrom.querySelector('#address');
 var roomNumber = mainFrom.querySelector('#room_number');
 // Find room capacity
 var capacity = mainFrom.querySelector('#capacity');
-// Submit form button
+// Find submit form button
 var submit = mainFrom.querySelector('.ad-form__submit');
+
 
 // Set default position of map pin in address input (Round pin)
 addressField.value = getCurrentPosition(mainPin);
@@ -472,4 +520,18 @@ capacity.addEventListener('change', function () {
 // and submit form
 submit.addEventListener('click', function () {
   compareRoomsAndCapacity(roomNumber);
+});
+
+// Create empty element for replacement with real card
+var temporaryElement = document.createElement('article');
+// Add className the same as a real card className
+temporaryElement.className = 'map__card';
+// Hide element (it gets CSS rules and looks bad)
+temporaryElement.style.display = 'none';
+// Put element before .map__filters-container block
+map.insertBefore(temporaryElement, map.children[1]);
+
+// Render card when click on pin
+pinContainer.addEventListener('click', function (evt) {
+  showCard(evt);
 });
