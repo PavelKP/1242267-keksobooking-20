@@ -385,20 +385,28 @@ var getCurrentPosition = function (pinBlock, sharpTail) {
 var compareRoomsAndCapacity = function () {
 
   if (+roomNumber.value < +capacity.value) {
-    // Set error message
+    // Set error message on rooms
     roomNumber.setCustomValidity('Количество комнат не может быть меньше числа гостей');
+    // Unset capacity message
+    capacity.setCustomValidity('');
   } else if (+roomNumber.value === 100 && +capacity.value !== 0) {
-    // Set error message
-    /* ------------------ BUG HERE!!!!!!!!!!! -------------------- */
+    // Set error message on capacity
     capacity.setCustomValidity('Гостей приглашать запрещено');
+    // Unset rooms message
+    roomNumber.setCustomValidity('');
   } else if (+roomNumber.value !== 100 && +capacity.value === 0) {
-    // Set error message
+    // Set error message on rooms
     roomNumber.setCustomValidity('Выберите не менее 100 комнат');
+    // Unset capacity message
+    capacity.setCustomValidity('');
   } else {
     // Unset messages for two inputs
     capacity.setCustomValidity('');
     roomNumber.setCustomValidity('');
   }
+  // Force fire validity event
+  roomNumber.reportValidity();
+  capacity.reportValidity();
 };
 
 // Close popup
@@ -469,7 +477,7 @@ var setEqualInAndOutTime = function (target) {
   }
 };
 
-// Validate number field on submit
+// Live number input validation
 var validateInputNumber = function (element) {
   // Get min and max values of input
   var min = element.getAttribute('min');
@@ -485,29 +493,11 @@ var validateInputNumber = function (element) {
     // Remove custom error message - everything is ok
     element.setCustomValidity('');
   }
+  // Force fire validity event
+  element.reportValidity();
 };
 
-// Validate text field on submit
-var validateInputText = function (element) {
-  // Get min and max length attributes of input
-  var min = element.getAttribute('minlength');
-  var max = element.getAttribute('maxlength');
-
-  if (element.validity.valueMissing) {
-    element.setCustomValidity('Поле должно содержать от ' + min + ' до ' + max + ' символов');
-  } else if (element.validity.tooShort) {
-    element.setCustomValidity('Поле должно содержать не менее ' + min + ' символов');
-  } else if (element.validity.tooLong) {
-    element.setCustomValidity('Поле должно содержать не более ' + max + ' символов');
-  } else {
-    // Remove custom error message - everything is ok
-    element.setCustomValidity('');
-  }
-};
-
-// Live input validation
-// Выводит количество символов в браузерном сообщении, только если перед этим отправить форму
-// Если заменить setCustomValidity на console.log(), то выводится сразу при вводе
+// Live text input validation
 var validateInputTextLive = function (element) {
   // Get min and max length attributes of input
   var min = element.getAttribute('minlength');
@@ -515,7 +505,10 @@ var validateInputTextLive = function (element) {
   // Count value length
   var valueLength = element.value.length;
 
-  if (valueLength <= min) {
+  if (!element.value.length) {
+    // This condition will work only on input
+    element.setCustomValidity('Поле должно содержать от ' + min + ' до ' + max + ' символов');
+  } else if (valueLength <= min) {
     element.setCustomValidity('Введите ещё ' + (min - valueLength) + ' символов');
   } else if (valueLength > max) {
     element.setCustomValidity('Удалите ' + (valueLength - max) + ' символов');
@@ -523,6 +516,8 @@ var validateInputTextLive = function (element) {
     // Remove custom error message - everything is ok
     element.setCustomValidity('');
   }
+  // Force fire validity event
+  element.reportValidity();
 };
 
 // Find map
@@ -622,14 +617,11 @@ roomNumber.addEventListener('change', function () {
 capacity.addEventListener('change', function () {
   compareRoomsAndCapacity();
 });
+// If change accommodation type validate price
 typeInput.addEventListener('change', function () {
   setMinPriceLimit();
-});
-
-// It is needed if we don't change any select
-// and submit form
-submit.addEventListener('click', function () {
-  compareRoomsAndCapacity();
+  // Validate price
+  validateInputNumber(priceInput);
 });
 
 // Checkin time become equal checkout time If change checkout input
@@ -644,17 +636,21 @@ timeInInput.addEventListener('change', function () {
   setEqualInAndOutTime('in');
 });
 
-// Add custom validation of title on submit
-titleInput.addEventListener('invalid', function () {
-  validateInputText(titleInput);
-});
-
 // Add custom validation of title on input
 titleInput.addEventListener('input', function () {
   validateInputTextLive(titleInput);
 });
 
 // Add custom validation of price input on submit
-priceInput.addEventListener('invalid', function () {
+priceInput.addEventListener('input', function () {
   validateInputNumber(priceInput);
+});
+
+// It is needed if we don't change any control
+// and submit form
+submit.addEventListener('click', function () {
+  // Validate inputs before user's input
+  validateInputTextLive(titleInput);
+  validateInputNumber(priceInput);
+  compareRoomsAndCapacity();
 });
