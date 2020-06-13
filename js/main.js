@@ -20,6 +20,25 @@ var PIN_WIDTH = 50;
 var PIN_HEIGHT = 70;
 var ADVERTS_AMOUNT = 8;
 
+var TYPE_AND_PRICE_LIBRARY = {
+  flat: {
+    translation: 'Квартира',
+    minPrice: 1000
+  },
+  palace: {
+    translation: 'Дворец',
+    minPrice: 10000
+  },
+  house: {
+    translation: 'Дом',
+    minPrice: 5000
+  },
+  bungalo: {
+    translation: 'Бунгало',
+    minPrice: 0
+  }
+};
+
 // Get random number from min to max (inclusive)
 var getRandomNumber = function (min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min);
@@ -217,28 +236,6 @@ var addTextAndCheck = function (element, textData) {
   }
 };
 
-// Translate from english to russian
-var translate = function (origin) {
-  switch (origin) {
-    case 'flat':
-      origin = 'Квартира';
-      break;
-    case 'palace':
-      origin = 'Дворец';
-      break;
-    case 'house':
-      origin = 'Дом';
-      break;
-    case 'bungalo':
-      origin = 'Бунгало';
-      break;
-    default:
-      origin = false;
-      break;
-  }
-  return origin;
-};
-
 // Create card
 var createCard = function (template, data) {
   var card = template.cloneNode(true);
@@ -264,8 +261,8 @@ var createCard = function (template, data) {
   addTextAndCheck(price, data.offer.price);
   // Add price units
   price.insertAdjacentHTML('beforeend', ' ' + PRICE_UNITS);
-  // Add type of accommodation
-  addTextAndCheck(type, translate(data.offer.type));
+  // Add type of accommodation - use constant library to translate text
+  addTextAndCheck(type, TYPE_AND_PRICE_LIBRARY[data.offer.type].translation);
   // Add description
   addTextAndCheck(description, data.offer.description);
   // Add capacity
@@ -392,6 +389,7 @@ var compareRoomsAndCapacity = function () {
     roomNumber.setCustomValidity('Количество комнат не может быть меньше числа гостей');
   } else if (+roomNumber.value === 100 && +capacity.value !== 0) {
     // Set error message
+    /* ------------------ BUG HERE!!!!!!!!!!! -------------------- */
     capacity.setCustomValidity('Гостей приглашать запрещено');
   } else if (+roomNumber.value !== 100 && +capacity.value === 0) {
     // Set error message
@@ -455,6 +453,78 @@ var showCard = function (evt) {
   }
 };
 
+var setMinPriceLimit = function () {
+  priceInput.placeholder = 'От ' + TYPE_AND_PRICE_LIBRARY[typeInput.value].minPrice;
+  priceInput.min = TYPE_AND_PRICE_LIBRARY[typeInput.value].minPrice;
+};
+
+var setEqualInAndOutTime = function (target) {
+  // target - changed input
+  if (target === 'in') {
+    // timeout = timein
+    timeOutInput.value = timeInInput.value;
+  } else if (target === 'out') {
+    // timein = timeout
+    timeInInput.value = timeOutInput.value;
+  }
+};
+
+// Validate number field on submit
+var validateInputNumber = function (element) {
+  // Get min and max values of input
+  var min = element.getAttribute('min');
+  var max = element.getAttribute('max');
+
+  if (element.validity.valueMissing) {
+    element.setCustomValidity('Заполните поле');
+  } else if (element.validity.rangeUnderflow) {
+    element.setCustomValidity('Укажите цифру не менее ' + min);
+  } else if (element.validity.rangeOverflow) {
+    element.setCustomValidity('Укажите цифру не более ' + max);
+  } else {
+    // Remove custom error message - everything is ok
+    element.setCustomValidity('');
+  }
+};
+
+// Validate text field on submit
+var validateInputText = function (element) {
+  // Get min and max length attributes of input
+  var min = element.getAttribute('minlength');
+  var max = element.getAttribute('maxlength');
+
+  if (element.validity.valueMissing) {
+    element.setCustomValidity('Поле должно содержать от ' + min + ' до ' + max + ' символов');
+  } else if (element.validity.tooShort) {
+    element.setCustomValidity('Поле должно содержать не менее ' + min + ' символов');
+  } else if (element.validity.tooLong) {
+    element.setCustomValidity('Поле должно содержать не более ' + max + ' символов');
+  } else {
+    // Remove custom error message - everything is ok
+    element.setCustomValidity('');
+  }
+};
+
+// Live input validation
+// Выводит количество символов в браузерном сообщении, только если перед этим отправить форму
+// Если заменить setCustomValidity на console.log(), то выводится сразу при вводе
+var validateInputTextLive = function (element) {
+  // Get min and max length attributes of input
+  var min = element.getAttribute('minlength');
+  var max = element.getAttribute('maxlength');
+  // Count value length
+  var valueLength = element.value.length;
+
+  if (valueLength <= min) {
+    element.setCustomValidity('Введите ещё ' + (min - valueLength) + ' символов');
+  } else if (valueLength > max) {
+    element.setCustomValidity('Удалите ' + (valueLength - max) + ' символов');
+  } else {
+    // Remove custom error message - everything is ok
+    element.setCustomValidity('');
+  }
+};
+
 // Find map
 var map = document.querySelector('.map');
 // Find pin template
@@ -467,20 +537,32 @@ var pinContainer = document.querySelector('.map__pins');
 var cardTemplate = document.querySelector('#card')
   .content
   .querySelector('.map__card');
+// Find map pin
+var mainPin = document.querySelector('.map__pin--main');
+
+// ----------- Form elements ------------//
 // Find form for adding new advert
 var mainFrom = document.querySelector('.ad-form');
 // Find filter in map
 var mapFilterForm = document.querySelector('.map__filters');
-// Find map pin
-var mainPin = document.querySelector('.map__pin--main');
 // Find address input
 var addressField = mainFrom.querySelector('#address');
-// Find room number
+// Find room number input
 var roomNumber = mainFrom.querySelector('#room_number');
-// Find room capacity
+// Find room capacity input
 var capacity = mainFrom.querySelector('#capacity');
 // Find submit form button
 var submit = mainFrom.querySelector('.ad-form__submit');
+// Find accommodation type input
+var typeInput = mainFrom.querySelector('#type');
+// Find min price input
+var priceInput = mainFrom.querySelector('#price');
+// Find checkin time select
+var timeInInput = mainFrom.querySelector('#timein');
+// Find checkout time select
+var timeOutInput = mainFrom.querySelector('#timeout');
+// Find title input
+var titleInput = mainFrom.querySelector('#title');
 
 
 // Set default position of map pin in address input (Round pin)
@@ -496,6 +578,11 @@ disableFromElements(mapFilterForm, ['input', 'select']);
 mainPin.addEventListener('mousedown', function (evt) {
   if (evt.button === 0) {
     startInterface();
+    // Prepare interface
+    // Set min price
+    setMinPriceLimit();
+    // Deny type text in address input
+    addressField.setAttribute('readonly', '');
   }
 });
 
@@ -503,23 +590,14 @@ mainPin.addEventListener('mousedown', function (evt) {
 mainPin.addEventListener('keydown', function (evt) {
   if (evt.keyCode === 13) {
     startInterface();
+    // Prepare interface
+    // Set min price
+    setMinPriceLimit();
+    // Deny type text in address input
+    addressField.readonly = true;
+    // Deny type text in address input
+    addressField.setAttribute('readonly', '');
   }
-});
-
-// If change room number check condition
-roomNumber.addEventListener('change', function () {
-  compareRoomsAndCapacity();
-});
-
-// If change capacity check condition
-capacity.addEventListener('change', function () {
-  compareRoomsAndCapacity();
-});
-
-// It is needed if we don't change any select (roomNumber, capacity)
-// and submit form
-submit.addEventListener('click', function () {
-  compareRoomsAndCapacity(roomNumber);
 });
 
 // Create empty element for replacement with real card
@@ -534,4 +612,49 @@ map.insertBefore(temporaryElement, map.children[1]);
 // Render card when click on pin
 pinContainer.addEventListener('click', function (evt) {
   showCard(evt);
+});
+
+// If change room number check condition
+roomNumber.addEventListener('change', function () {
+  compareRoomsAndCapacity();
+});
+// If change capacity check condition
+capacity.addEventListener('change', function () {
+  compareRoomsAndCapacity();
+});
+typeInput.addEventListener('change', function () {
+  setMinPriceLimit();
+});
+
+// It is needed if we don't change any select
+// and submit form
+submit.addEventListener('click', function () {
+  compareRoomsAndCapacity();
+});
+
+// Checkin time become equal checkout time If change checkout input
+timeOutInput.addEventListener('change', function () {
+  // Argument - target (change input)
+  setEqualInAndOutTime('out');
+});
+
+// Checkout time become equal checkin time If change checkin input
+timeInInput.addEventListener('change', function () {
+  // Argument - target (change input)
+  setEqualInAndOutTime('in');
+});
+
+// Add custom validation of title on submit
+titleInput.addEventListener('invalid', function () {
+  validateInputText(titleInput);
+});
+
+// Add custom validation of title on input
+titleInput.addEventListener('input', function () {
+  validateInputTextLive(titleInput);
+});
+
+// Add custom validation of price input on submit
+priceInput.addEventListener('invalid', function () {
+  validateInputNumber(priceInput);
 });
