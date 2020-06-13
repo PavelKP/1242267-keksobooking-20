@@ -461,11 +461,13 @@ var showCard = function (evt) {
   }
 };
 
+// Set dynamic price placeholder and minimum limit
 var setMinPriceLimit = function () {
   priceInput.placeholder = 'От ' + TYPE_AND_PRICE_LIBRARY[typeInput.value].minPrice;
   priceInput.min = TYPE_AND_PRICE_LIBRARY[typeInput.value].minPrice;
 };
 
+// Make checkin=checkout and vice versa
 var setEqualInAndOutTime = function (target) {
   // target - changed input
   if (target === 'in') {
@@ -617,7 +619,7 @@ roomNumber.addEventListener('change', function () {
 capacity.addEventListener('change', function () {
   compareRoomsAndCapacity();
 });
-// If change accommodation type validate price
+// If change accommodation type - change price limit, validate price
 typeInput.addEventListener('change', function () {
   setMinPriceLimit();
   // Validate price
@@ -626,13 +628,13 @@ typeInput.addEventListener('change', function () {
 
 // Checkin time become equal checkout time If change checkout input
 timeOutInput.addEventListener('change', function () {
-  // Argument - target (change input)
+  // Argument - target (changing input)
   setEqualInAndOutTime('out');
 });
 
 // Checkout time become equal checkin time If change checkin input
 timeInInput.addEventListener('change', function () {
-  // Argument - target (change input)
+  // Argument - target (changing input)
   setEqualInAndOutTime('in');
 });
 
@@ -641,7 +643,7 @@ titleInput.addEventListener('input', function () {
   validateInputTextLive(titleInput);
 });
 
-// Add custom validation of price input on submit
+// Add custom validation of price on input
 priceInput.addEventListener('input', function () {
   validateInputNumber(priceInput);
 });
