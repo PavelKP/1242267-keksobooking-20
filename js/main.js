@@ -20,6 +20,25 @@ var PIN_WIDTH = 50;
 var PIN_HEIGHT = 70;
 var ADVERTS_AMOUNT = 8;
 
+var TYPE_AND_PRICE_LIBRARY = {
+  flat: {
+    translation: 'Квартира',
+    minPrice: 1000
+  },
+  palace: {
+    translation: 'Дворец',
+    minPrice: 10000
+  },
+  house: {
+    translation: 'Дом',
+    minPrice: 5000
+  },
+  bungalo: {
+    translation: 'Бунгало',
+    minPrice: 0
+  }
+};
+
 // Get random number from min to max (inclusive)
 var getRandomNumber = function (min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min);
@@ -145,6 +164,8 @@ var createPin = function (template, data, i) {
   pinElement.style.top = data[i].location.y + countOffset('y') + 'px';
   img.src = data[i].author.avatar;
   img.alt = data[i].offer.title;
+  // Set ID fto bound Pin element and data
+  pinElement.setAttribute('data-id', i);
 
   return pinElement;
 };
@@ -215,34 +236,9 @@ var addTextAndCheck = function (element, textData) {
   }
 };
 
-// Translate from english to russian
-var translate = function (origin) {
-  switch (origin) {
-    case 'flat':
-      origin = 'Квартира';
-      break;
-    case 'palace':
-      origin = 'Дворец';
-      break;
-    case 'house':
-      origin = 'Дом';
-      break;
-    case 'bungalo':
-      origin = 'Бунгало';
-      break;
-    default:
-      origin = false;
-      break;
-  }
-  return origin;
-};
-
 // Create card
-// ----------------------------eslint-disable ---------------------------
-// eslint-disable-next-line no-unused-vars
 var createCard = function (template, data) {
   var card = template.cloneNode(true);
-  data = data[0];
 
   // Find elements
   var title = card.querySelector('.popup__title');
@@ -265,8 +261,8 @@ var createCard = function (template, data) {
   addTextAndCheck(price, data.offer.price);
   // Add price units
   price.insertAdjacentHTML('beforeend', ' ' + PRICE_UNITS);
-  // Add type of accommodation
-  addTextAndCheck(type, translate(data.offer.type));
+  // Add type of accommodation - use constant library to translate text
+  addTextAndCheck(type, TYPE_AND_PRICE_LIBRARY[data.offer.type].translation);
   // Add description
   addTextAndCheck(description, data.offer.description);
   // Add capacity
@@ -351,8 +347,6 @@ var startInterface = function () {
 
   // Set up pins on the map
   fillPinContainer(pinTemplate, advertData, pinContainer);
-  // Add card before .map__filters-container block
-  // map.insertBefore(createCard(cardTemplate, advertData), map.children[1]);
 
   // Set coordinates value in address input (Sharp pin)
   // The last argument of getCurrentPosition() is length of sharp tail
@@ -391,19 +385,141 @@ var getCurrentPosition = function (pinBlock, sharpTail) {
 var compareRoomsAndCapacity = function () {
 
   if (+roomNumber.value < +capacity.value) {
-    // Set error message
+    // Set error message on rooms
     roomNumber.setCustomValidity('Количество комнат не может быть меньше числа гостей');
+    // Unset capacity message
+    capacity.setCustomValidity('');
   } else if (+roomNumber.value === 100 && +capacity.value !== 0) {
-    // Set error message
+    // Set error message on capacity
     capacity.setCustomValidity('Гостей приглашать запрещено');
+    // Unset rooms message
+    roomNumber.setCustomValidity('');
   } else if (+roomNumber.value !== 100 && +capacity.value === 0) {
-    // Set error message
+    // Set error message on rooms
     roomNumber.setCustomValidity('Выберите не менее 100 комнат');
+    // Unset capacity message
+    capacity.setCustomValidity('');
   } else {
     // Unset messages for two inputs
     capacity.setCustomValidity('');
     roomNumber.setCustomValidity('');
   }
+  // Force fire validity event
+  roomNumber.reportValidity();
+  capacity.reportValidity();
+};
+
+// Close popup
+var closePopup = function () {
+  // Find actual popup element
+  var popup = map.querySelector('.map__card');
+  // Hide card
+  popup.hidden = true;
+  // Remove ESC listener from document
+  document.removeEventListener('keydown', onPopupEscPress);
+};
+
+// Callback to invoke closePopup() on ESC down
+var onPopupEscPress = function (evt) {
+  if (evt.keyCode === 27) {
+    evt.preventDefault();
+    closePopup();
+  }
+};
+
+// Show card - fetch card from array by id, put it in HTML, add listeners
+var showCard = function (evt) {
+  // Catch click on img (not in main pin)
+  var id;
+  if (evt.target && evt.target.matches('.map__pin:not(.map__pin--main) img')) {
+    // Find id in parent element
+    id = evt.target.parentNode.dataset.id;
+    // Catch click on button (not in main pin)
+  } else if (evt.target && evt.target.matches('.map__pin:not(.map__pin--main)')) {
+    // Find id in target element
+    id = evt.target.dataset.id;
+  }
+
+  // Find a temporary element or previous created card
+  var previous = map.querySelector('.map__card');
+  // Check existence of id
+  // If we click on pin--main, id will be empty
+  if (id) {
+    // Add card before .map__filters-container block
+    map.replaceChild(createCard(cardTemplate, advertData[id]), previous);
+
+    // Find popup close button
+    var popupCloseButton = map.querySelector('.popup__close');
+
+    // Add listener to close popup when click on button "X"
+    popupCloseButton.addEventListener('click', function () {
+      closePopup();
+    });
+
+    // Add listener to run callback on any key down (ESC close)
+    document.addEventListener('keydown', onPopupEscPress);
+  }
+};
+
+// Set dynamic price placeholder and minimum limit
+var setMinPriceLimit = function () {
+  priceInput.placeholder = 'От ' + TYPE_AND_PRICE_LIBRARY[typeInput.value].minPrice;
+  priceInput.min = TYPE_AND_PRICE_LIBRARY[typeInput.value].minPrice;
+};
+
+// Make checkin=checkout and vice versa
+var setEqualInAndOutTime = function (target) {
+  // target - changed input
+  if (target === 'in') {
+    // timeout = timein
+    timeOutInput.value = timeInInput.value;
+  } else if (target === 'out') {
+    // timein = timeout
+    timeInInput.value = timeOutInput.value;
+  }
+};
+
+// Live number input validation
+var validateInputNumber = function (element) {
+  // Get min and max values of input
+  var min = element.getAttribute('min');
+  var max = element.getAttribute('max');
+
+  if (element.validity.valueMissing) {
+    element.setCustomValidity('Заполните поле');
+  } else if (element.validity.rangeUnderflow) {
+    element.setCustomValidity('Укажите цифру не менее ' + min);
+  } else if (element.validity.rangeOverflow) {
+    element.setCustomValidity('Укажите цифру не более ' + max);
+  } else {
+    // Remove custom error message - everything is ok
+    element.setCustomValidity('');
+  }
+  // Force fire validity event
+  element.reportValidity();
+};
+
+// Live text input validation
+var validateInputTextLive = function (element) {
+  // Get min and max length attributes of input
+  var min = element.getAttribute('minlength');
+  var max = element.getAttribute('maxlength');
+  // Count value length
+  var valueLength = element.value.length;
+
+  if (!element.value.length) {
+    // This condition will work only on input
+    element.setCustomValidity('Поле должно содержать от ' + min + ' до ' + max + ' символов');
+  } else if (valueLength <= min) {
+    element.setCustomValidity('Введите ещё ' + (min - valueLength) + ' символов');
+  } else if (valueLength > max) {
+    element.setCustomValidity('Удалите ' + (valueLength - max) + ' символов');
+  } else {
+    // Remove custom error message - everything is ok
+    element.setCustomValidity('');
+  }
+  // Force fire validity event
+  element.reportValidity();
 };
 
 // Find map
@@ -415,25 +531,36 @@ var pinTemplate = document.querySelector('#pin')
 // Find pin container
 var pinContainer = document.querySelector('.map__pins');
 // Find card template
-// ----------------------------eslint-disable ---------------------------
-// eslint-disable-next-line no-unused-vars
 var cardTemplate = document.querySelector('#card')
   .content
   .querySelector('.map__card');
-// find form for adding new advert
-var mainFrom = document.querySelector('.ad-form');
-// find filter in map
-var mapFilterForm = document.querySelector('.map__filters');
 // Find map pin
 var mainPin = document.querySelector('.map__pin--main');
+
+// ----------- Form elements ------------//
+// Find form for adding new advert
+var mainFrom = document.querySelector('.ad-form');
+// Find filter in map
+var mapFilterForm = document.querySelector('.map__filters');
 // Find address input
 var addressField = mainFrom.querySelector('#address');
-// Find room number
+// Find room number input
 var roomNumber = mainFrom.querySelector('#room_number');
-// Find room capacity
+// Find room capacity input
 var capacity = mainFrom.querySelector('#capacity');
-// Submit form button
+// Find submit form button
 var submit = mainFrom.querySelector('.ad-form__submit');
+// Find accommodation type input
+var typeInput = mainFrom.querySelector('#type');
+// Find min price input
+var priceInput = mainFrom.querySelector('#price');
+// Find checkin time select
+var timeInInput = mainFrom.querySelector('#timein');
+// Find checkout time select
+var timeOutInput = mainFrom.querySelector('#timeout');
+// Find title input
+var titleInput = mainFrom.querySelector('#title');
+
 
 // Set default position of map pin in address input (Round pin)
 addressField.value = getCurrentPosition(mainPin);
@@ -448,6 +575,11 @@ disableFromElements(mapFilterForm, ['input', 'select']);
 mainPin.addEventListener('mousedown', function (evt) {
   if (evt.button === 0) {
     startInterface();
+    // Prepare interface
+    // Set min price
+    setMinPriceLimit();
+    // Deny type text in address input
+    addressField.setAttribute('readonly', '');
   }
 });
 
@@ -455,21 +587,72 @@ mainPin.addEventListener('mousedown', function (evt) {
 mainPin.addEventListener('keydown', function (evt) {
   if (evt.keyCode === 13) {
     startInterface();
+    // Prepare interface
+    // Set min price
+    setMinPriceLimit();
+    // Deny type text in address input
+    addressField.readonly = true;
+    // Deny type text in address input
+    addressField.setAttribute('readonly', '');
   }
+});
+
+// Create empty element for replacement with real card
+var temporaryElement = document.createElement('article');
+// Add className the same as a real card className
+temporaryElement.className = 'map__card';
+// Hide element (it gets CSS rules and looks bad)
+temporaryElement.style.display = 'none';
+// Put element before .map__filters-container block
+map.insertBefore(temporaryElement, map.children[1]);
+
+// Render card when click on pin
+pinContainer.addEventListener('click', function (evt) {
+  showCard(evt);
 });
 
 // If change room number check condition
 roomNumber.addEventListener('change', function () {
   compareRoomsAndCapacity();
 });
-
 // If change capacity check condition
 capacity.addEventListener('change', function () {
   compareRoomsAndCapacity();
 });
+// If change accommodation type - change price limit, validate price
+typeInput.addEventListener('change', function () {
+  setMinPriceLimit();
+  // Validate price
+  validateInputNumber(priceInput);
+});
 
-// It is needed if we don't change any select (roomNumber, capacity)
+// Checkin time become equal checkout time If change checkout input
+timeOutInput.addEventListener('change', function () {
+  // Argument - target (changing input)
+  setEqualInAndOutTime('out');
+});
+
+// Checkout time become equal checkin time If change checkin input
+timeInInput.addEventListener('change', function () {
+  // Argument - target (changing input)
+  setEqualInAndOutTime('in');
+});
+
+// Add custom validation of title on input
+titleInput.addEventListener('input', function () {
+  validateInputTextLive(titleInput);
+});
+
+// Add custom validation of price on input
+priceInput.addEventListener('input', function () {
+  validateInputNumber(priceInput);
+});
+
+// It is needed if we don't change any control
 // and submit form
 submit.addEventListener('click', function () {
-  compareRoomsAndCapacity(roomNumber);
+  // Validate inputs before user's input
+  validateInputTextLive(titleInput);
+  validateInputNumber(priceInput);
+  compareRoomsAndCapacity();
 });
