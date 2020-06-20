@@ -62,6 +62,7 @@ window.mockData = (function () {
     }
     return array;
   };
+
   // return the object with public method
   return {
     generateAdvertArray: generateAdvertArray

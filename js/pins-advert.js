@@ -1,6 +1,6 @@
 'use strict';
 
-window.pinAdvert = (function () {
+window.pinsAdvert = (function () {
 
   // Count offset for pin
   var countOffset = function (axis) {

@@ -40,12 +40,37 @@ window.utils = (function () {
     return array.slice(start, end);
   };
 
+  // Check pressed key - ESC
+  var isEscDown = function (evt, cb) {
+    if (evt.keyCode === 27) {
+      evt.preventDefault();
+      cb();
+    }
+  };
+  // Check pressed key - Enter
+  var isEnterDown = function (evt, cb) {
+    if (evt.keyCode === 13) {
+      evt.preventDefault();
+      cb();
+    }
+  };
+  // Check pressed key - Enter
+  var isMouseLeftDown = function (evt, cb) {
+    if (evt.button === 0) {
+      evt.preventDefault();
+      cb();
+    }
+  };
+
   // return the object with public methods
   return {
     getRandomNumber: getRandomNumber,
     getRandomFromArray: getRandomFromArray,
     getRandomArray: getRandomArray,
-    getRandomSlice: getRandomSlice
+    getRandomSlice: getRandomSlice,
+    isEscDown: isEscDown,
+    isEnterDown: isEnterDown,
+    isMouseLeftDown: isMouseLeftDown
   };
 
 })();

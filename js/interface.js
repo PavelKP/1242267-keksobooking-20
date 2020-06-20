@@ -33,32 +33,37 @@ window.interface = (function () {
     window.visibility.addVisibility();
 
     // Set up pins on the map
-    window.pinAdvert.fillPinContainer(pinTemplate, advertData, pinContainer);
+    window.pinsAdvert.fillPinContainer(pinTemplate, advertData, pinContainer);
 
     // Set coordinates value in address input (Sharp pin)
     // The last argument of getCurrentPosition() is length of sharp tail
     addressField.value = window.pinMain.getCurrentPosition(mainPin, 22);
+  };
 
-    // Prepare interface
+  // Prepare interface after page os loaded
+  var setDefaultInterface = function () {
     // Set min price
     window.validity.setMinPriceLimit(priceInput, typeInput);
     // Deny type text in address input
     addressField.setAttribute('readonly', '');
+    // Set default position of map pin in address input (Round pin)
+    addressField.value = window.pinMain.getCurrentPosition(mainPin);
+    // Disable form elements for adding new advert
+    window.visibility.disableFromElements(mainFrom, ['input', 'select', 'textarea', 'button']);
+    // Disable form elements in filter
+    window.visibility.disableFromElements(mapFilterForm, ['input', 'select']);
   };
 
-
+  // --------Lock interface by default
+  setDefaultInterface();
+  // --------Unlock interface
   // Start interface when click on "maffin"
   mainPin.addEventListener('mousedown', function (evt) {
-    if (evt.button === 0) {
-      startInterface();
-    }
+    window.utils.isMouseLeftDown(evt, startInterface);
   });
-
   // Start interface on press "Enter"
   mainPin.addEventListener('keydown', function (evt) {
-    if (evt.keyCode === 13) {
-      startInterface();
-    }
+    window.utils.isEnterDown(evt, startInterface);
   });
 
   return advertData;

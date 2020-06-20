@@ -1,6 +1,7 @@
 'use strict';
 
 window.popupCard = (function () {
+
   // Return fragment with element (by copying child from parent)
   var addCopyElements = function (block, element, data) {
     var fragment = document.createDocumentFragment();
@@ -127,6 +128,8 @@ window.popupCard = (function () {
 
   // Find map
   var map = document.querySelector('.map');
+  // Find pin container
+  var pinContainer = document.querySelector('.map__pins');
   // Find card template
   var cardTemplate = document.querySelector('#card')
   .content
@@ -144,10 +147,7 @@ window.popupCard = (function () {
 
   // Callback to invoke closePopup() on ESC down
   var onPopupEscPress = function (evt) {
-    if (evt.keyCode === 27) {
-      evt.preventDefault();
-      closePopup();
-    }
+    window.utils.isEscDown(evt, closePopup);
   };
 
   // Show card - fetch card from array by id, put it in HTML, add listeners
@@ -162,18 +162,15 @@ window.popupCard = (function () {
       // Find id in target element
       id = evt.target.dataset.id;
     }
-
     // Find a temporary element or previous created card
     var previous = map.querySelector('.map__card');
     // Check existence of id
     // If we click on pin--main, id will be empty
     if (id) {
       // Add card before .map__filters-container block
-      map.replaceChild(window.popupCard.createCard(cardTemplate, window.interface[id]), previous);
-
+      map.replaceChild(createCard(cardTemplate, window.interface[id]), previous);
       // Find popup close button
       var popupCloseButton = map.querySelector('.popup__close');
-
       // Add listener to close popup when click on button "X"
       popupCloseButton.addEventListener('click', function () {
         closePopup();
@@ -184,9 +181,22 @@ window.popupCard = (function () {
     }
   };
 
-  return {
-    createCard: createCard,
-    showCard: showCard
+  // Create empty element for replacement with real card
+  var createTempCard = function () {
+    var temporaryElement = document.createElement('article');
+    // Add className the same as a real card className
+    temporaryElement.className = 'map__card';
+    // Hide element (it gets CSS rules and looks bad)
+    temporaryElement.style.display = 'none';
+    // Put element before .map__filters-container block
+    map.insertBefore(temporaryElement, map.children[1]);
   };
+
+  // Create temporary card
+  createTempCard(map);
+  // Render card when click on pin
+  pinContainer.addEventListener('click', function (evt) {
+    showCard(evt);
+  });
 
 })();
