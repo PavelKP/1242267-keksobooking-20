@@ -44,7 +44,7 @@ window.interface = (function () {
     mainPin.removeEventListener('mousedown', cbBindedMouse);
     mainPin.removeEventListener('keydown', cbBindedEnter);
     // Activate feature to drag mainPin
-    activateMainPinMove();
+    window.pinMainMove.activateMainPinMove();
   };
 
   // Prepare interface after page os loaded
@@ -59,42 +59,6 @@ window.interface = (function () {
     window.visibility.disableFromElements(mainFrom, ['input', 'select', 'textarea', 'button']);
     // Disable form elements in filter
     window.visibility.disableFromElements(mapFilterForm, ['input', 'select']);
-  };
-
-  var activateMainPinMove = function () {
-    mainPin.addEventListener('mousedown', function (evt) {
-      evt.preventDefault();
-
-      var startCoords = {
-        x: evt.clientX,
-        y: evt.clientY
-      };
-
-      var onMouseMove = function (evtMove) {
-        var shift = {
-          x: startCoords.x - evtMove.clientX,
-          y: startCoords.y - evtMove.clientY
-        };
-
-        startCoords = {
-          x: evtMove.clientX,
-          y: evtMove.clientY
-        };
-
-        mainPin.style.left = mainPin.offsetLeft - shift.x + 'px';
-        mainPin.style.top = mainPin.offsetTop - shift.y + 'px';
-      };
-
-      var onMouseUp = function (UpEvt) {
-        UpEvt.preventDefault();
-
-        document.removeEventListener('mousemove', onMouseMove);
-        document.removeEventListener('mouseup', onMouseUp);
-      };
-
-      document.addEventListener('mousemove', onMouseMove);
-      document.addEventListener('mouseup', onMouseUp);
-    });
   };
 
   // --------Lock interface by default

@@ -3,14 +3,11 @@
 window.pinMain = (function () {
   // Get current Pin position
   var getCurrentPosition = function (pinBlock, sharpTail) {
-    // Get current coordinates (inline left and top properties)
-    var left = pinBlock.style.left;
-    var top = pinBlock.style.top;
+    // Get current coordinates (left and top indents from parent)
+    var leftIndent = pinBlock.offsetLeft;
+    var topIndent = pinBlock.offsetTop;
 
-    // Convert to number without 'px'
-    left = +left.replace(/px/, '');
-    top = +top.replace(/px/, '');
-    // Count offsets to define center point
+    // Half of round pin part
     var leftOffset = pinBlock.offsetWidth / 2;
     var topOffset;
     // Check existence of sharp tail
@@ -23,10 +20,11 @@ window.pinMain = (function () {
     }
 
     // Add offsets and round
-    left = Math.round(left + leftOffset);
-    top = Math.round(top + topOffset);
+    // Round floor because left offset is fractional, and left point must be zero
+    var coordX = Math.floor(leftIndent + leftOffset);
+    var coordY = Math.round(topIndent + topOffset);
 
-    return left + ', ' + top;
+    return coordX + ', ' + coordY;
   };
 
   return {
