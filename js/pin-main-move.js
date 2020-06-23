@@ -1,25 +1,26 @@
 'use strict';
 
 window.pinMainMove = (function () {
+  // Height of mainPin
+  var PIN_HEIGHT = 87;
+  // Width of mainPin
+  var PIN_WIDTH = 65;
 
   // Find map pin
   var mainPin = document.querySelector('.map__pin--main');
   // Find map
   var map = document.querySelector('.map');
+  // - address input
+  var addressField = document.querySelector('#address');
 
   // Define empty variables, all functions can use it like a buffer
   var startCoords = {};
-  var isDown = true;
-  var shift;
-  var newPinPosTop;
-  var newPinPosLeft;
 
   // MainPin movement
   var onMouseMove = function (evtMove) {
-
     // Coordinate X/Y (first click) in Window - new X/Y coordinate in Window (per one mouse move)
     // example: 10 - 11 = -1
-    shift = {
+    var shift = {
       x: startCoords.x - evtMove.clientX,
       y: startCoords.y - evtMove.clientY
     };
@@ -30,69 +31,82 @@ window.pinMainMove = (function () {
       y: evtMove.clientY
     };
 
-    newPinPosTop = mainPin.offsetTop - shift.y;
-
+    // Offset after which we can move pin from top
     var pinTopOffset = 31;
+    // Count 1 step on Y axis
+    var newPinPosTop = mainPin.offsetTop - shift.y;
 
-    if (newPinPosTop <= 130) {
-      newPinPosTop = 130;
-    } else if (startCoords.y < 130 + pinTopOffset) {
-      newPinPosTop = 130;
+    // top boundary - pin height
+    // sharp tail points on max Y coordinate
+    var topLimit = 130 - PIN_HEIGHT;
+
+    // We can set style.top <= top boundary(limit)
+    if (newPinPosTop <= topLimit) {
+      newPinPosTop = topLimit;
+      // Pin won't move if cursor is above boundary + offset
+      // We need offset to move pin, when cursor in the center of pin
+    } else if (startCoords.y < topLimit + pinTopOffset) {
+      newPinPosTop = topLimit;
     }
 
+    // Offset after which we can move pin from bottom
     var pinBottomOffset = 42;
+    var botLimit = 630 - PIN_HEIGHT;
 
-    if (newPinPosTop >= 630) {
-      newPinPosTop = 630;
-    } else if (startCoords.y > 705 - pinBottomOffset) {
-      newPinPosTop = 630;
+    // We can set style.top >= bottom boundary(limit)
+    if (newPinPosTop >= botLimit) {
+      newPinPosTop = botLimit;
+    // Pin won't move if cursor is under boundary + offset
+    } else if (startCoords.y > botLimit + pinBottomOffset) {
+      newPinPosTop = botLimit;
     }
 
-    newPinPosLeft = mainPin.offsetLeft - shift.x;
+    // Count 1 step on X axis
+    var newPinPosLeft = mainPin.offsetLeft - shift.x;
 
-    // Find left and right boundaries of map
+    // Count left and right boundaries of map
     var mapLeftBoundary = (document.documentElement.clientWidth - map.offsetWidth) / 2;
     var mapRightBoundary = mapLeftBoundary + map.offsetWidth;
 
-    if (newPinPosLeft <= -31) {
-      newPinPosLeft = -31;
+    // Half of pin width
+    var leftLimit = -PIN_WIDTH / 2;
+
+    if (newPinPosLeft <= leftLimit) {
+      newPinPosLeft = leftLimit;
     } else if (startCoords.x <= mapLeftBoundary) {
-      newPinPosLeft = -31;
+      newPinPosLeft = leftLimit;
     }
 
-    if (newPinPosLeft > (map.offsetWidth - 31)) {
-      newPinPosLeft = (map.offsetWidth - 31);
+    // Right border of map - half of pin width
+    var rightLimit = map.offsetWidth - (PIN_WIDTH / 2);
+
+    if (newPinPosLeft > rightLimit) {
+      newPinPosLeft = rightLimit;
     } else if (startCoords.x >= mapRightBoundary) {
-      newPinPosLeft = (map.offsetWidth - 31);
+      newPinPosLeft = rightLimit;
     }
 
+    // Set style position of Pin
     mainPin.style.top = newPinPosTop + 'px';
     mainPin.style.left = newPinPosLeft + 'px';
 
-    if (isDown === true) {
-      // If mouse is down start move mainPin again
-      mainPin.addEventListener('mouseover', onMouseOver);
-    }
+    // Set new coordinates in form (address field) on mouse move
+    addressField.value = window.pinMain.getCurrentPosition(mainPin, 22);
   };
 
-  var onMouseOver = function () {
-    mainPin.removeEventListener('mouseover', onMouseOver);
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
-  };
-
+  // When mouse button is up, movement stops
   var onMouseUp = function (UpEvt) {
     UpEvt.preventDefault();
 
-    isDown = false;
-    console.log('Отпущена');
-
+    // Remove event listeners and stop pin moving
     document.removeEventListener('mousemove', onMouseMove);
     document.removeEventListener('mouseup', onMouseUp);
-    // kkkkk
-    mainPin.removeEventListener('mouseover', onMouseOver);
+
+    // Set new coordinates in form (address field) on mouse up
+    addressField.value = window.pinMain.getCurrentPosition(mainPin, 22);
   };
 
+  // Start movement on mouse down
   var activateMainPinMove = function () {
     mainPin.addEventListener('mousedown', function (evt) {
       evt.preventDefault();
@@ -101,8 +115,6 @@ window.pinMainMove = (function () {
         x: evt.clientX,
         y: evt.clientY
       };
-
-      isDown = true;
 
       document.addEventListener('mousemove', onMouseMove);
       document.addEventListener('mouseup', onMouseUp);
