@@ -38,6 +38,13 @@ window.interface = (function () {
     // Set coordinates value in address input (Sharp pin)
     // The last argument of getCurrentPosition() is length of sharp tail
     addressField.value = window.pinMain.getCurrentPosition(mainPin, 22);
+
+    // Remove listeners - we can click on MainPin and start interface only one time
+    // If don't do this, we get second and third mousemove listeners, drag feature will work wrong
+    mainPin.removeEventListener('mousedown', cbBindedMouse);
+    mainPin.removeEventListener('keydown', cbBindedEnter);
+    // Activate feature to drag mainPin
+    window.pinMainMove.activateMainPinMove();
   };
 
   // Prepare interface after page os loaded
@@ -56,15 +63,18 @@ window.interface = (function () {
 
   // --------Lock interface by default
   setDefaultInterface();
+
   // --------Unlock interface
+  // Bind key checking functions and startInterface()
+  // -- evt object from listener will be the last arg in .bind()
+  // -- without cb in apart variable I can't remove listener
+  var cbBindedMouse = window.utils.isMouseLeftDown.bind(null, startInterface);
+  var cbBindedEnter = window.utils.isEnterDown.bind(null, startInterface);
+
   // Start interface when click on "maffin"
-  mainPin.addEventListener('mousedown', function (evt) {
-    window.utils.isMouseLeftDown(evt, startInterface);
-  });
+  mainPin.addEventListener('mousedown', cbBindedMouse);
   // Start interface on press "Enter"
-  mainPin.addEventListener('keydown', function (evt) {
-    window.utils.isEnterDown(evt, startInterface);
-  });
+  mainPin.addEventListener('keydown', cbBindedEnter);
 
   return advertData;
 

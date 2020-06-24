@@ -48,14 +48,14 @@ window.utils = (function () {
     }
   };
   // Check pressed key - Enter
-  var isEnterDown = function (evt, cb) {
+  var isEnterDown = function (cb, evt) {
     if (evt.keyCode === 13) {
       evt.preventDefault();
       cb();
     }
   };
   // Check pressed key - Enter
-  var isMouseLeftDown = function (evt, cb) {
+  var isMouseLeftDown = function (cb, evt) {
     if (evt.button === 0) {
       evt.preventDefault();
       cb();
