@@ -151,7 +151,7 @@ window.popupCard = (function () {
   };
 
   // Show card - fetch card from array by id, put it in HTML, add listeners
-  var showCard = function (evt) {
+  var showCard = function (evt, data) {
     // Catch click on img (not in main pin)
     var id;
     if (evt.target && evt.target.matches('.map__pin:not(.map__pin--main) img')) {
@@ -168,7 +168,7 @@ window.popupCard = (function () {
     // If we click on pin--main, id will be empty
     if (id) {
       // Add card before .map__filters-container block
-      map.replaceChild(createCard(cardTemplate, window.interface[id]), previous);
+      map.replaceChild(createCard(cardTemplate, data[id]), previous);
       // Find popup close button
       var popupCloseButton = map.querySelector('.popup__close');
       // Add listener to close popup when click on button "X"
@@ -192,11 +192,17 @@ window.popupCard = (function () {
     map.insertBefore(temporaryElement, map.children[1]);
   };
 
-  // Create temporary card
-  createTempCard(map);
-  // Render card when click on pin
-  pinContainer.addEventListener('click', function (evt) {
-    showCard(evt);
-  });
+  var onPinClick = function (data) {
+    // Create temporary card
+    createTempCard(map);
+    // Render card when click on pin
+    pinContainer.addEventListener('click', function (evt) {
+      showCard(evt, data);
+    });
+  };
+
+  return {
+    onPinClick: onPinClick
+  };
 
 })();

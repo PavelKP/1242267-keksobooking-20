@@ -62,6 +62,33 @@ window.utils = (function () {
     }
   };
 
+  // Show error message
+  var showError = function (text) {
+    // create element
+    var el = document.createElement('div');
+    // Add error message
+    el.textContent = text;
+    // Add styles
+    el.style.position = 'absolute';
+    el.style.zIndex = '100';
+    el.style.top = '0';
+    el.style.left = '0';
+    el.style.right = '0';
+    el.style.height = '50px';
+
+    el.style.fontSize = '2rem';
+    el.style.color = 'white';
+    el.style.backgroundColor = 'rgba(255, 0, 0 , 0.7)';
+
+    // Add element to body top
+    document.body.insertAdjacentElement('afterbegin', el);
+
+    // Remove el after 2 sec
+    setTimeout(function () {
+      document.body.removeChild(el);
+    }, 2000);
+  };
+
   // return the object with public methods
   return {
     getRandomNumber: getRandomNumber,
@@ -70,7 +97,8 @@ window.utils = (function () {
     getRandomSlice: getRandomSlice,
     isEscDown: isEscDown,
     isEnterDown: isEnterDown,
-    isMouseLeftDown: isMouseLeftDown
+    isMouseLeftDown: isMouseLeftDown,
+    showError: showError
   };
 
 })();

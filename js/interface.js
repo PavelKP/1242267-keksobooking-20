@@ -1,6 +1,28 @@
 'use strict';
 
 window.interface = (function () {
+  // Handle successful server response
+  var onSuccess = function (xhrReturned) {
+    // JSON is expected
+    var rawResult = xhrReturned.responseText;
+
+    try {
+      // Check data format
+      var data = JSON.parse(rawResult);
+    } catch (err) {
+      window.showError('Incoming JSON is invalid:' + err.message);
+    }
+
+    // Run interface with data
+    startInterface(data);
+    // Add listeners on Pins to show popUp
+    window.popupCard.onPinClick(data);
+  };
+  // Handle bad server response
+  var onError = function (message) {
+    window.utils.showError(message);
+  };
+
   // Find form for adding new advert
   var mainFrom = document.querySelector('.ad-form');
   // Find form elements:
@@ -21,19 +43,15 @@ window.interface = (function () {
     .querySelector('.map__pin');
   // Find pin container
   var pinContainer = document.querySelector('.map__pins');
-  // Create array with advert objects
-  var advertData = window.mockData.generateAdvertArray(window.constants.ADVERTS_AMOUNT);
-
   // Collect and run all functions to start interface
-  var startInterface = function () {
+  var startInterface = function (data) {
     // Remove disable attributes from form elements
     window.visibility.disableFromElements(mainFrom, ['input', 'select', 'textarea', 'button'], false);
     window.visibility.disableFromElements(mapFilterForm, ['input', 'select'], false);
     // Remove hiding classes
     window.visibility.addVisibility();
-
     // Set up pins on the map
-    window.pinsAdvert.fillPinContainer(pinTemplate, advertData, pinContainer);
+    window.pinsAdvert.fillPinContainer(pinTemplate, data, pinContainer);
 
     // Set coordinates value in address input (Sharp pin)
     // The last argument of getCurrentPosition() is length of sharp tail
@@ -65,17 +83,20 @@ window.interface = (function () {
   setDefaultInterface();
 
   // --------Unlock interface
-  // Bind key checking functions and startInterface()
+  // --------Only after successful data loading
+  // Bind key checking functions and load() function
   // -- evt object from listener will be the last arg in .bind()
   // -- without cb in apart variable I can't remove listener
-  var cbBindedMouse = window.utils.isMouseLeftDown.bind(null, startInterface);
-  var cbBindedEnter = window.utils.isEnterDown.bind(null, startInterface);
+  // Bind arguments to load()
+  var cbBindedMouse = window.utils.isMouseLeftDown.bind(null,
+      window.load.bind(null, window.constants.SERVER_URL, onError, onSuccess)
+  );
+  var cbBindedEnter = window.utils.isEnterDown.bind(null,
+      window.load.bind(null, window.constants.SERVER_URL, onError, onSuccess)
+  );
 
   // Start interface when click on "maffin"
   mainPin.addEventListener('mousedown', cbBindedMouse);
   // Start interface on press "Enter"
   mainPin.addEventListener('keydown', cbBindedEnter);
-
-  return advertData;
-
 })();
