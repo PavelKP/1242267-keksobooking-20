@@ -37,6 +37,7 @@ window.constants = (function () {
         translation: 'Бунгало',
         minPrice: 0
       }
-    }
+    },
+    SERVER_URL: 'https://javascript.pages.academy/keksobooking/data'
   };
 })();

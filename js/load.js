@@ -45,7 +45,7 @@
 
     // If no connection to the server (no answer from server)
     xhr.addEventListener('error', function () {
-      onError('Произошла ошибка соединения с сервером.');
+      onError('Произошла ошибка соединения с сервером');
     });
     // If waiting answer from server is too long
     xhr.addEventListener('timeout', function () {
