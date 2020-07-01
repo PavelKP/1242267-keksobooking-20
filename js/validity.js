@@ -93,6 +93,16 @@ window.validity = (function () {
     // Force fire validity event
     element.reportValidity();
   };
+  // Success handler for data loading
+  var onSuccess = function (returnObj) {
+    console.log(returnObj.response);
+    console.log(returnObj.status);
+  };
+
+  // Error handler for data loading
+  var onError = function (returnObj) {
+    console.log(returnObj);
+  };
 
   // ----------- Form elements ------------//
   // Find form for adding new advert
@@ -149,11 +159,21 @@ window.validity = (function () {
   });
   // It is needed if we don't change any control
   // and submit form
-  submit.addEventListener('click', function () {
+  submit.addEventListener('click', function (evt) {
     // Validate inputs before user's input
+    // Else we get native browser validation message
     validateInputTextLive(titleInput);
     validateInputNumber(priceInput);
     compareRoomsAndCapacity(roomNumber, capacity);
+
+    // Prevent page reloading
+    evt.preventDefault();
+
+    // If form is valid, send data to server
+    if (mainFrom.reportValidity()) {
+      // Collect form data and send
+      window.upload(new FormData(mainFrom), onError, onSuccess);
+    }
   });
 
   return {
