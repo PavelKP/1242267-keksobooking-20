@@ -87,6 +87,8 @@ window.interface = (function () {
     // Remove click handler from pin container
     // Get cb from global scope
     pinContainer.removeEventListener('click', window.cb);
+    // Remove current popup card
+    document.querySelector('.map__card').remove();
 
     // Start interface when click on "maffin"
     mainPin.addEventListener('mousedown', cbBindedMouse);
