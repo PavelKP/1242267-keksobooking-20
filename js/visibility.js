@@ -4,12 +4,12 @@ window.visibility = (function () {
   // Find map
   var map = document.querySelector('.map');
   // Find main form for adding new advert
-  var mainFrom = document.querySelector('.ad-form');
+  var mainForm = document.querySelector('.ad-form');
 
-  // Show hidden blocks
-  var addVisibility = function () {
-    map.classList.remove('map--faded');
-    mainFrom.classList.remove('ad-form--disabled');
+  // Show or hide blocks
+  var changeVisibility = function () {
+    map.classList.toggle('map--faded');
+    mainForm.classList.toggle('ad-form--disabled');
   };
 
   var disableFromElements = function (form, tagArray, flag) {
@@ -37,7 +37,7 @@ window.visibility = (function () {
 
   return {
     disableFromElements: disableFromElements,
-    addVisibility: addVisibility
+    changeVisibility: changeVisibility
   };
 
 })();

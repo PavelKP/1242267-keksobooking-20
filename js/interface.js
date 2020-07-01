@@ -11,8 +11,10 @@ window.interface = (function () {
       var data = JSON.parse(rawResult);
       // Run interface with data
       startInterface(data);
-      // Add listeners on Pins to show popUp
-      window.popupCard.onPinClick(data);
+      // Add listeners on Pin container to show popUp
+      // Function returns cb, thus I can delete listener later
+      // Define cb in global scope
+      window.cb = window.popupCard.onPinClick(data);
     } catch (err) {
       window.utils.showError('Получен некорректный JSON: ' + err.message);
       // if error is caught, we won't run interface
@@ -44,13 +46,14 @@ window.interface = (function () {
     .querySelector('.map__pin');
   // Find pin container
   var pinContainer = document.querySelector('.map__pins');
+
   // Collect and run all functions to start interface
   var startInterface = function (data) {
     // Remove disable attributes from form elements
     window.visibility.disableFromElements(mainFrom, ['input', 'select', 'textarea', 'button'], false);
     window.visibility.disableFromElements(mapFilterForm, ['input', 'select'], false);
     // Remove hiding classes
-    window.visibility.addVisibility();
+    window.visibility.changeVisibility();
     // Set up pins on the map
     window.pinsAdvert.fillPinContainer(pinTemplate, data, pinContainer);
 
@@ -66,7 +69,32 @@ window.interface = (function () {
     window.pinMainMove.activateMainPinMove();
   };
 
-  // Prepare interface after page os loaded
+  // Return interface to initial state
+  var shutInterface = function () {
+    // Disable from elements
+    window.visibility.disableFromElements(mainFrom, ['input', 'select', 'textarea', 'button'], true);
+    window.visibility.disableFromElements(mapFilterForm, ['input', 'select'], true);
+    // Add hiding classes (transform main pin to default state)
+    window.visibility.changeVisibility();
+    // Clear pin container
+    window.pinsAdvert.clearPinContainer(pinContainer);
+    // Stop main pin movement
+    window.pinMainMove.stopMainPinMove();
+    // Set default main pin position
+    window.pinMainMove.setDefaultPosition();
+    // Recalculate and set coordinates (without tail)
+    addressField.value = window.pinMain.getCurrentPosition(mainPin);
+    // Remove click handler from pin container
+    // Get cb from global scope
+    pinContainer.removeEventListener('click', window.cb);
+
+    // Start interface when click on "maffin"
+    mainPin.addEventListener('mousedown', cbBindedMouse);
+    // Start interface on press "Enter"
+    mainPin.addEventListener('keydown', cbBindedEnter);
+  };
+
+  // Prepare interface after page is loaded
   var setDefaultInterface = function () {
     // Set min price
     window.validity.setMinPriceLimit(priceInput, typeInput);
@@ -100,4 +128,9 @@ window.interface = (function () {
   mainPin.addEventListener('mousedown', cbBindedMouse);
   // Start interface on press "Enter"
   mainPin.addEventListener('keydown', cbBindedEnter);
+
+  return {
+    shutInterface: shutInterface
+  };
+
 })();

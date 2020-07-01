@@ -93,16 +93,6 @@ window.validity = (function () {
     // Force fire validity event
     element.reportValidity();
   };
-  // Success handler for data loading
-  var onSuccess = function (returnObj) {
-    console.log(returnObj.response);
-    console.log(returnObj.status);
-  };
-
-  // Error handler for data loading
-  var onError = function (returnObj) {
-    console.log(returnObj);
-  };
 
   // ----------- Form elements ------------//
   // Find form for adding new advert
@@ -124,6 +114,19 @@ window.validity = (function () {
   // Find title input
   var titleInput = mainFrom.querySelector('#title');
 
+  // Success handler for data loading
+  var onSuccess = function (returnObj) {
+    console.log(returnObj.response);
+    console.log(returnObj.status);
+    // Reset form
+    mainFrom.reset();
+    window.interface.shutInterface();
+  };
+
+  // Error handler for data loading
+  var onError = function (returnObj) {
+    console.log(returnObj);
+  };
 
   // If change room number check condition
   roomNumber.addEventListener('change', function () {
