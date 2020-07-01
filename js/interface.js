@@ -9,14 +9,15 @@ window.interface = (function () {
     try {
       // Check data format
       var data = JSON.parse(rawResult);
+      // Run interface with data
+      startInterface(data);
+      // Add listeners on Pins to show popUp
+      window.popupCard.onPinClick(data);
     } catch (err) {
-      window.showError('Incoming JSON is invalid:' + err.message);
+      window.utils.showError('Получен некорректный JSON: ' + err.message);
+      // if error is caught, we won't run interface
     }
 
-    // Run interface with data
-    startInterface(data);
-    // Add listeners on Pins to show popUp
-    window.popupCard.onPinClick(data);
   };
   // Handle bad server response
   var onError = function (message) {
