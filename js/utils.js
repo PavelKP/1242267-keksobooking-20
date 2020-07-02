@@ -41,7 +41,7 @@ window.utils = (function () {
   };
 
   // Check pressed key - ESC
-  var isEscDown = function (evt, cb) {
+  var isEscDown = function (cb, evt) {
     if (evt.keyCode === 27) {
       evt.preventDefault();
       cb();
@@ -54,7 +54,7 @@ window.utils = (function () {
       cb();
     }
   };
-  // Check pressed key - Enter
+  // Check pressed left mouse button
   var isMouseLeftDown = function (cb, evt) {
     if (evt.button === 0) {
       evt.preventDefault();
@@ -87,6 +87,46 @@ window.utils = (function () {
     setTimeout(function () {
       document.body.removeChild(el);
     }, 2000);
+  };
+
+  // Show popup if error appears
+  var showAdvertError = function (errorMessage) {
+    // Find container
+    var mainContainer = document.querySelector('main');
+    // Find error popup template
+    var template = document.querySelector('#error')
+      .content
+      .querySelector('.error');
+    // Clone template node
+    template = template.cloneNode(true);
+
+    // Find close button
+    var button = template.querySelector('.error__button');
+
+    // Remove popup and all listeners
+    var removePopup = function () {
+      template.remove();
+      button.removeEventListener('click', onDocumentClick);
+      document.removeEventListener('click', onButtonClick);
+      document.removeEventListener('keydown', onPopupEsc);
+    };
+
+    // Show popup
+    mainContainer.insertAdjacentElement('afterbegin', template);
+
+    // Define callback - for button
+    var onButtonClick = removePopup;
+    // Define callbacks - for document
+    var onDocumentClick = removePopup;
+    // Define callback with button checking
+    var onPopupEsc = isEscDown.bind(null, removePopup);
+
+    // Add listener - close popup on button click
+    button.addEventListener('click', onButtonClick);
+    // Add listener - close popup on document click
+    document.addEventListener('click', onDocumentClick);
+    // Add listener - close popup on ESC down
+    document.addEventListener('keydown', onPopupEsc);
   };
 
   // Define map witch error messages
@@ -143,7 +183,8 @@ window.utils = (function () {
     isMouseLeftDown: isMouseLeftDown,
     showError: showError,
     onLoad: onLoad,
-    onServerNoResponse: onServerNoResponse
+    onServerNoResponse: onServerNoResponse,
+    showAdvertError: showAdvertError
   };
 
 })();

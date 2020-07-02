@@ -124,8 +124,11 @@ window.validity = (function () {
   };
 
   // Error handler for data loading
-  var onError = function (returnObj) {
-    console.log(returnObj);
+  var onError = function (errorMessage) {
+    // Show popup with error
+    window.utils.showAdvertError(errorMessage);
+    // Enable submit button
+    submit.disabled = false;
   };
 
   // If change room number check condition
@@ -176,6 +179,9 @@ window.validity = (function () {
     if (mainFrom.reportValidity()) {
       // Collect form data and send
       window.upload(new FormData(mainFrom), onError, onSuccess);
+
+      // Disable submit button
+      submit.disabled = true;
     }
   });
 

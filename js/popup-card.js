@@ -147,7 +147,7 @@ window.popupCard = (function () {
 
   // Callback to invoke closePopup() on ESC down
   var onPopupEscPress = function (evt) {
-    window.utils.isEscDown(evt, closePopup);
+    window.utils.isEscDown(closePopup, evt);
   };
 
   // Show card - fetch card from array by id, put it in HTML, add listeners
