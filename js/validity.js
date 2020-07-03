@@ -115,18 +115,19 @@ window.validity = (function () {
   var titleInput = mainFrom.querySelector('#title');
 
   // Success handler for data loading
-  var onSuccess = function (returnObj) {
-    console.log(returnObj.response);
-    console.log(returnObj.status);
+  var onSuccess = function () {
     // Reset form
     mainFrom.reset();
+    // Set interface to default state
     window.interface.shutInterface();
+    // Show popup with success message
+    window.utils.showMessagePopup(null, 'success');
   };
 
   // Error handler for data loading
   var onError = function (errorMessage) {
     // Show popup with error
-    window.utils.showAdvertError(errorMessage);
+    window.utils.showMessagePopup(errorMessage, 'error');
     // Enable submit button
     submit.disabled = false;
   };

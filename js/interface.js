@@ -16,7 +16,7 @@ window.interface = (function () {
       // Define cb in global scope
       window.cb = window.popupCard.onPinClick(data);
     } catch (err) {
-      window.utils.showError('Получен некорректный JSON: ' + err.message);
+      window.utils.showMessagePopup('Получен некорректный JSON: ' + err.message, 'error');
       // if error is caught, we won't run interface
     }
 

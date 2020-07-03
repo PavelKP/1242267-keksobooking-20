@@ -62,71 +62,60 @@ window.utils = (function () {
     }
   };
 
-  // Show error message
-  var showError = function (text) {
-    // create element
-    var el = document.createElement('div');
-    // Add error message
-    el.textContent = text;
-    // Add styles
-    el.style.position = 'absolute';
-    el.style.zIndex = '100';
-    el.style.top = '0';
-    el.style.left = '0';
-    el.style.right = '0';
-    el.style.height = '50px';
+  // Show popup if message appears
+  var showMessagePopup = function (errorMessage, type) {
 
-    el.style.fontSize = '2rem';
-    el.style.color = 'white';
-    el.style.backgroundColor = 'rgba(255, 0, 0 , 0.7)';
-
-    // Add element to body top
-    document.body.insertAdjacentElement('afterbegin', el);
-
-    // Remove el after 2 sec
-    setTimeout(function () {
-      document.body.removeChild(el);
-    }, 2000);
-  };
-
-  // Show popup if error appears
-  var showAdvertError = function (errorMessage) {
+    if (type !== 'error' && type !== 'success') {
+      throw new Error('указан неправильный тип сообщения');
+    }
     // Find container
     var mainContainer = document.querySelector('main');
     // Find error popup template
-    var template = document.querySelector('#error')
+    var template = document.querySelector('#' + type)
       .content
-      .querySelector('.error');
+      .querySelector('.' + type);
     // Clone template node
-    template = template.cloneNode(true);
-
-    // Find close button
-    var button = template.querySelector('.error__button');
+    var templateClone = template.cloneNode(true);
 
     // Remove popup and all listeners
     var removePopup = function () {
-      template.remove();
-      button.removeEventListener('click', onDocumentClick);
-      document.removeEventListener('click', onButtonClick);
+      templateClone.remove();
+
+      if (type === 'error') {
+        button.removeEventListener('click', onButtonClick);
+      }
+
+      document.removeEventListener('mousedown', onDocumentClick);
       document.removeEventListener('keydown', onPopupEsc);
     };
 
-    // Show popup
-    mainContainer.insertAdjacentElement('afterbegin', template);
+    // Define callback - for document
+    var onDocumentClick = isMouseLeftDown.bind(null, removePopup);
+    // Using mousedown is necessary
+    // on mouse down data is downloading and this function starts
+    // at this moment click has already started (???)
+    // on mouse up finishes click and popup will close immediately
+    document.addEventListener('mousedown', onDocumentClick);
 
-    // Define callback - for button
-    var onButtonClick = removePopup;
-    // Define callbacks - for document
-    var onDocumentClick = removePopup;
-    // Define callback with button checking
+    // Define callback with button checking - for ESC
     var onPopupEsc = isEscDown.bind(null, removePopup);
-
-    // Add listener - close popup on button click
-    button.addEventListener('click', onButtonClick);
-    // Add listener - close popup on document click
-    document.addEventListener('click', onDocumentClick);
-    // Add listener - close popup on ESC down
+    // Add listener - close popup on ESC
     document.addEventListener('keydown', onPopupEsc);
+
+    if (type === 'error') {
+      // Define callback - for button
+      var onButtonClick = isMouseLeftDown.bind(null, removePopup);
+      // Find close button
+      var button = templateClone.querySelector('.error__button');
+      // Add listener - close popup on button click
+      button.addEventListener('click', onButtonClick);
+      // Find message container
+      var textEl = templateClone.querySelector('.error__message');
+      // Set message
+      textEl.textContent = errorMessage;
+    }
+    // Show popup
+    mainContainer.appendChild(templateClone);
   };
 
   // Define map witch error messages
@@ -138,7 +127,7 @@ window.utils = (function () {
     '400': 'Bad Request',
     '401': 'Unauthorized',
     '403': 'Forbidden',
-    '404': 'Server is not found',
+    '404': 'Сервер не найден',
     '409': 'Conflict',
     '500': 'Internal Server Error'
   };
@@ -152,10 +141,10 @@ window.utils = (function () {
       // Handle error response
       if (ErrTextMap[xhr.status]) {
         // If error exists in map, pass custom message
-        onError(ErrTextMap[xhr.status]);
+        showMessagePopup(ErrTextMap[xhr.status], 'error');
       } else {
         // If no error in map, pass native message
-        onError('Cтатус ответа: ' + xhr.status + ' - ' + xhr.statusText);
+        showMessagePopup('Cтатус ответа: ' + xhr.status + ' - ' + xhr.statusText, 'error');
       }
     }
   };
@@ -181,10 +170,9 @@ window.utils = (function () {
     isEscDown: isEscDown,
     isEnterDown: isEnterDown,
     isMouseLeftDown: isMouseLeftDown,
-    showError: showError,
     onLoad: onLoad,
     onServerNoResponse: onServerNoResponse,
-    showAdvertError: showAdvertError
+    showMessagePopup: showMessagePopup
   };
 
 })();
