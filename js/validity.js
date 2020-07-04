@@ -179,7 +179,7 @@ window.validity = (function () {
     // If form is valid, send data to server
     if (mainFrom.reportValidity()) {
       // Collect form data and send
-      window.upload(new FormData(mainFrom), onError, onSuccess);
+      window.server.upload(new FormData(mainFrom), onError, onSuccess);
 
       // Disable submit button
       submit.disabled = true;

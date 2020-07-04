@@ -118,49 +118,6 @@ window.utils = (function () {
     mainContainer.appendChild(templateClone);
   };
 
-  // Define map witch error messages
-  var ErrTextMap = {
-    '100': 'Request received, continuing process',
-    '200': 'Successful request',
-    '201': 'Created',
-    '204': 'No Content',
-    '400': 'Bad Request',
-    '401': 'Unauthorized',
-    '403': 'Forbidden',
-    '404': 'Сервер не найден',
-    '409': 'Conflict',
-    '500': 'Internal Server Error'
-  };
-
-  // Handle load event
-  var onLoad = function (xhr, onError, onSuccess) {
-    // Handle success response
-    if (xhr.status === 200) {
-      onSuccess(xhr);
-    } else {
-      // Handle error response
-      if (ErrTextMap[xhr.status]) {
-        // If error exists in map, pass custom message
-        showMessagePopup(ErrTextMap[xhr.status], 'error');
-      } else {
-        // If no error in map, pass native message
-        showMessagePopup('Cтатус ответа: ' + xhr.status + ' - ' + xhr.statusText, 'error');
-      }
-    }
-  };
-
-  var onServerNoResponse = function (xhr, onError) {
-    // If no connection to the server (no answer from server)
-    xhr.addEventListener('error', function () {
-      onError('Произошла ошибка соединения с сервером');
-    });
-
-    // If waiting answer from server is too long
-    xhr.addEventListener('timeout', function () {
-      onError('Запрос не успел выполниться за ' + xhr.timeout + 'мс');
-    });
-  };
-
   // return the object with public methods
   return {
     getRandomNumber: getRandomNumber,
@@ -170,8 +127,6 @@ window.utils = (function () {
     isEscDown: isEscDown,
     isEnterDown: isEnterDown,
     isMouseLeftDown: isMouseLeftDown,
-    onLoad: onLoad,
-    onServerNoResponse: onServerNoResponse,
     showMessagePopup: showMessagePopup
   };
 

@@ -120,10 +120,10 @@ window.interface = (function () {
   // -- without cb in apart variable I can't remove listener
   // Bind arguments to load()
   var cbBindedMouse = window.utils.isMouseLeftDown.bind(null,
-      window.load.bind(null, window.constants.SERVER_URL, onError, onSuccess)
+      window.server.load.bind(null, window.constants.SERVER_URL_RECEIVE, onError, onSuccess)
   );
   var cbBindedEnter = window.utils.isEnterDown.bind(null,
-      window.load.bind(null, window.constants.SERVER_URL, onError, onSuccess)
+      window.server.load.bind(null, window.constants.SERVER_URL_RECEIVE, onError, onSuccess)
   );
 
   // Start interface when click on "maffin"

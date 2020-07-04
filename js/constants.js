@@ -38,6 +38,7 @@ window.constants = (function () {
         minPrice: 0
       }
     },
-    SERVER_URL: 'https://javascript.pages.academy/keksobooking/data'
+    SERVER_URL_RECEIVE: 'https://javascript.pages.academy/keksobooking/data',
+    SERVER_URL_SEND: 'https://javascript.pages.academy/keksobooking'
   };
 })();
