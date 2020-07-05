@@ -67,6 +67,8 @@ window.interface = (function () {
     mainPin.removeEventListener('keydown', cbBindedEnter);
     // Activate feature to drag mainPin
     window.pinMainMove.activateMainPinMove();
+
+    window.filter.addToHousingType(data);
   };
 
   // Return interface to initial state
