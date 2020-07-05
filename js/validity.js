@@ -113,6 +113,8 @@ window.validity = (function () {
   var timeOutInput = mainFrom.querySelector('#timeout');
   // Find title input
   var titleInput = mainFrom.querySelector('#title');
+  // Find reset button
+  var resButton = document.querySelector('.ad-form__reset');
 
   // Success handler for data loading
   var onSuccess = function () {
@@ -164,6 +166,12 @@ window.validity = (function () {
   priceInput.addEventListener('input', function () {
     validateInputNumber(priceInput);
   });
+  // Add listener to reset button - for what???
+  resButton.addEventListener('click', function (evt) {
+    evt.preventDefault();
+    mainFrom.reset();
+  });
+
   // It is needed if we don't change any control
   // and submit form
   submit.addEventListener('click', function (evt) {
