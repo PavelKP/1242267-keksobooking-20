@@ -23,7 +23,7 @@ window.interface = (function () {
   };
   // Handle bad server response
   var onError = function (message) {
-    window.utils.showError(message);
+    window.utils.showMessagePopup(message, 'error');
   };
 
   // Find form for adding new advert
