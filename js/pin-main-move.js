@@ -6,6 +6,11 @@ window.pinMainMove = (function () {
   // Width of mainPin
   var PIN_WIDTH = 65;
 
+  // mainPin default left
+  var PIN_LEFT_DEFAULT = 570;
+  // mainPin default top
+  var PIN_TOP_DEFAULT = 375;
+
   // Find map pin
   var mainPin = document.querySelector('.map__pin--main');
   // Find map
@@ -106,23 +111,37 @@ window.pinMainMove = (function () {
     addressField.value = window.pinMain.getCurrentPosition(mainPin, 22);
   };
 
-  // Start movement on mouse down
+  // Callback to start move main pin
+  var onMouseDown = function (evt) {
+    evt.preventDefault();
+
+    startCoords = {
+      x: evt.clientX,
+      y: evt.clientY
+    };
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  };
+
+  // Start main pin movement on mouse down
   var activateMainPinMove = function () {
-    mainPin.addEventListener('mousedown', function (evt) {
-      evt.preventDefault();
-
-      startCoords = {
-        x: evt.clientX,
-        y: evt.clientY
-      };
-
-      document.addEventListener('mousemove', onMouseMove);
-      document.addEventListener('mouseup', onMouseUp);
-    });
+    mainPin.addEventListener('mousedown', onMouseDown);
+  };
+  // Stop main pin movement on mouse down
+  var stopMainPinMove = function () {
+    mainPin.removeEventListener('mousedown', onMouseDown);
+  };
+  // Set default main pin position
+  var setDefaultPosition = function () {
+    mainPin.style.left = PIN_LEFT_DEFAULT + 'px';
+    mainPin.style.top = PIN_TOP_DEFAULT + 'px';
   };
 
   return {
-    activateMainPinMove: activateMainPinMove
+    activateMainPinMove: activateMainPinMove,
+    stopMainPinMove: stopMainPinMove,
+    setDefaultPosition: setDefaultPosition
   };
 
 })();

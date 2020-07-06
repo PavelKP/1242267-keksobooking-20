@@ -41,7 +41,7 @@ window.utils = (function () {
   };
 
   // Check pressed key - ESC
-  var isEscDown = function (evt, cb) {
+  var isEscDown = function (cb, evt) {
     if (evt.keyCode === 27) {
       evt.preventDefault();
       cb();
@@ -54,7 +54,7 @@ window.utils = (function () {
       cb();
     }
   };
-  // Check pressed key - Enter
+  // Check pressed left mouse button
   var isMouseLeftDown = function (cb, evt) {
     if (evt.button === 0) {
       evt.preventDefault();
@@ -62,31 +62,60 @@ window.utils = (function () {
     }
   };
 
-  // Show error message
-  var showError = function (text) {
-    // create element
-    var el = document.createElement('div');
-    // Add error message
-    el.textContent = text;
-    // Add styles
-    el.style.position = 'absolute';
-    el.style.zIndex = '100';
-    el.style.top = '0';
-    el.style.left = '0';
-    el.style.right = '0';
-    el.style.height = '50px';
+  // Show popup if message appears
+  var showMessagePopup = function (errorMessage, type) {
 
-    el.style.fontSize = '2rem';
-    el.style.color = 'white';
-    el.style.backgroundColor = 'rgba(255, 0, 0 , 0.7)';
+    if (type !== 'error' && type !== 'success') {
+      throw new Error('указан неправильный тип сообщения');
+    }
+    // Find container
+    var mainContainer = document.querySelector('main');
+    // Find error popup template
+    var template = document.querySelector('#' + type)
+      .content
+      .querySelector('.' + type);
+    // Clone template node
+    var templateClone = template.cloneNode(true);
 
-    // Add element to body top
-    document.body.insertAdjacentElement('afterbegin', el);
+    // Remove popup and all listeners
+    var removePopup = function () {
+      templateClone.remove();
 
-    // Remove el after 2 sec
-    setTimeout(function () {
-      document.body.removeChild(el);
-    }, 2000);
+      if (type === 'error') {
+        button.removeEventListener('click', onButtonClick);
+      }
+
+      document.removeEventListener('mousedown', onDocumentClick);
+      document.removeEventListener('keydown', onPopupEsc);
+    };
+
+    // Define callback - for document
+    var onDocumentClick = isMouseLeftDown.bind(null, removePopup);
+    // Using mousedown is necessary
+    // on mouse down data is downloading and this function starts
+    // at this moment click has already started (???)
+    // on mouse up finishes click and popup will close immediately
+    document.addEventListener('mousedown', onDocumentClick);
+
+    // Define callback with button checking - for ESC
+    var onPopupEsc = isEscDown.bind(null, removePopup);
+    // Add listener - close popup on ESC
+    document.addEventListener('keydown', onPopupEsc);
+
+    if (type === 'error') {
+      // Define callback - for button
+      var onButtonClick = isMouseLeftDown.bind(null, removePopup);
+      // Find close button
+      var button = templateClone.querySelector('.error__button');
+      // Add listener - close popup on button click
+      button.addEventListener('click', onButtonClick);
+      // Find message container
+      var textEl = templateClone.querySelector('.error__message');
+      // Set message
+      textEl.textContent = errorMessage;
+    }
+    // Show popup
+    mainContainer.appendChild(templateClone);
   };
 
   // return the object with public methods
@@ -98,7 +127,7 @@ window.utils = (function () {
     isEscDown: isEscDown,
     isEnterDown: isEnterDown,
     isMouseLeftDown: isMouseLeftDown,
-    showError: showError
+    showMessagePopup: showMessagePopup
   };
 
 })();

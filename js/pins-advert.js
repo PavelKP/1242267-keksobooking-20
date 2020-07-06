@@ -44,8 +44,19 @@ window.pinsAdvert = (function () {
     container.appendChild(pinFragment);
   };
 
+  // Clear pin container with pins
+  var clearPinContainer = function (container) {
+    // Find all pins
+    var pins = container.querySelectorAll('.map__pin:not(.map__pin--main)');
+    // Remove all pins
+    for (var i = 0; i < pins.length; i++) {
+      container.removeChild(pins[i]);
+    }
+  };
+
   return {
-    fillPinContainer: fillPinContainer
+    fillPinContainer: fillPinContainer,
+    clearPinContainer: clearPinContainer
   };
 
 })();

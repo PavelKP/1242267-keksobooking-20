@@ -147,11 +147,11 @@ window.popupCard = (function () {
 
   // Callback to invoke closePopup() on ESC down
   var onPopupEscPress = function (evt) {
-    window.utils.isEscDown(evt, closePopup);
+    window.utils.isEscDown(closePopup, evt);
   };
 
   // Show card - fetch card from array by id, put it in HTML, add listeners
-  var showCard = function (evt, data) {
+  var showCard = function (data, evt) {
     // Catch click on img (not in main pin)
     var id;
     if (evt.target && evt.target.matches('.map__pin:not(.map__pin--main) img')) {
@@ -195,10 +195,14 @@ window.popupCard = (function () {
   var onPinClick = function (data) {
     // Create temporary card
     createTempCard(map);
+    // Bind cb with data
+    // I need apart cb to remove listener later
+    var onPinClickBinded = showCard.bind(null, data);
     // Render card when click on pin
-    pinContainer.addEventListener('click', function (evt) {
-      showCard(evt, data);
-    });
+    pinContainer.addEventListener('click', onPinClickBinded);
+
+    // return binded cb
+    return onPinClickBinded;
   };
 
   return {

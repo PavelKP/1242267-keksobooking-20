@@ -113,7 +113,26 @@ window.validity = (function () {
   var timeOutInput = mainFrom.querySelector('#timeout');
   // Find title input
   var titleInput = mainFrom.querySelector('#title');
+  // Find reset button
+  var resButton = document.querySelector('.ad-form__reset');
 
+  // Success handler for data loading
+  var onSuccess = function () {
+    // Reset form
+    mainFrom.reset();
+    // Set interface to default state
+    window.interface.shutInterface();
+    // Show popup with success message
+    window.utils.showMessagePopup(null, 'success');
+  };
+
+  // Error handler for data loading
+  var onError = function (errorMessage) {
+    // Show popup with error
+    window.utils.showMessagePopup(errorMessage, 'error');
+    // Enable submit button
+    submit.disabled = false;
+  };
 
   // If change room number check condition
   roomNumber.addEventListener('change', function () {
@@ -147,13 +166,32 @@ window.validity = (function () {
   priceInput.addEventListener('input', function () {
     validateInputNumber(priceInput);
   });
+  // Add listener to reset button - for what???
+  resButton.addEventListener('click', function (evt) {
+    evt.preventDefault();
+    mainFrom.reset();
+  });
+
   // It is needed if we don't change any control
   // and submit form
-  submit.addEventListener('click', function () {
+  submit.addEventListener('click', function (evt) {
     // Validate inputs before user's input
+    // Else we get native browser validation message
     validateInputTextLive(titleInput);
     validateInputNumber(priceInput);
     compareRoomsAndCapacity(roomNumber, capacity);
+
+    // Prevent page reloading
+    evt.preventDefault();
+
+    // If form is valid, send data to server
+    if (mainFrom.reportValidity()) {
+      // Collect form data and send
+      window.server.upload(new FormData(mainFrom), onError, onSuccess);
+
+      // Disable submit button
+      submit.disabled = true;
+    }
   });
 
   return {
