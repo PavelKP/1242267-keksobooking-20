@@ -9,12 +9,11 @@ window.interface = (function () {
     try {
       // Check data format
       var data = JSON.parse(rawResult);
+
+      // Shorten array
+      data = window.filter.cutArray(data, window.constants.MAX_ADVERT_AMOUNT);
       // Run interface with data
       startInterface(data);
-      // Add listeners on Pin container to show popUp
-      // Function returns cb, thus I can delete listener later
-      // Define cb in global scope
-      window.cb = window.popupCard.onPinClick(data);
     } catch (err) {
       window.utils.showMessagePopup('Получен некорректный JSON: ' + err.message, 'error');
       // if error is caught, we won't run interface

@@ -8,6 +8,7 @@ window.filter = (function () {
     .content
     .querySelector('.map__pin');
 
+  // Set filter to housing type
   var addToHousingType = function (data) {
     // Find filter form
     var filterForm = document.querySelector('.map__filters');
@@ -16,8 +17,17 @@ window.filter = (function () {
 
     // Render pins sorted by housing type
     var onHousingTypeChange = function () {
+      // Find Popup
+      var popup = document.querySelector('.map__card');
+      // Hide popup
+      popup.hidden = true;
+
       // Clear pin container
       window.pinsAdvert.clearPinContainer(pinContainer);
+      // Remove click handler from pin container
+      // Get cb from global scope
+      pinContainer.removeEventListener('click', window.cb);
+
       // Copy data array
       var dataCopy = data.slice();
 
@@ -34,8 +44,14 @@ window.filter = (function () {
     housingType.addEventListener('click', onHousingTypeChange);
   };
 
+  // Shorten array
+  var cutArray = function (data, max) {
+    return data.slice(0, max);
+  };
+
   return {
-    addToHousingType: addToHousingType
+    addToHousingType: addToHousingType,
+    cutArray: cutArray
   };
 
 })();
