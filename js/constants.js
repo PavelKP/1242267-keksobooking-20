@@ -40,6 +40,7 @@ window.constants = (function () {
     },
     SERVER_URL_RECEIVE: 'https://javascript.pages.academy/keksobooking/data',
     SERVER_URL_SEND: 'https://javascript.pages.academy/keksobooking',
-    MAX_ADVERT_AMOUNT: 5
+    MAX_ADVERT_AMOUNT: 5,
+    ERROR_POPUP_TIMEOUT: 1000 // 1 sec
   };
 })();
