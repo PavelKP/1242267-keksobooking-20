@@ -42,6 +42,10 @@ window.pinsAdvert = (function () {
     }
 
     container.appendChild(pinFragment);
+    // Add listeners on Pin container to show popUp
+    // Function returns cb, thus I can delete listener later
+    // Define cb in global scope
+    window.cb = window.popupCard.onPinClick(data);
   };
 
   // Clear pin container with pins
