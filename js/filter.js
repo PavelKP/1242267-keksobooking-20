@@ -7,16 +7,14 @@ window.filter = (function () {
   var pinTemplate = document.querySelector('#pin')
     .content
     .querySelector('.map__pin');
+  // Find filter form
+  var filterForm = document.querySelector('.map__filters');
 
   // Set filter to housing type
   var addToHousingType = function (data) {
-    // Find filter form
-    var filterForm = document.querySelector('.map__filters');
-    // Find housing type select
-    var housingType = filterForm.querySelector('#housing-type');
 
-    // Render pins sorted by housing type
-    var onHousingTypeChange = function () {
+    // Render pins sorted by changed control
+    var onFilterFormChange = function () {
       // Find Popup
       var popup = document.querySelector('.map__card');
       // Hide popup
@@ -31,17 +29,90 @@ window.filter = (function () {
       // Copy data array
       var dataCopy = data.slice();
 
-      if (housingType.value !== 'any') {
-        // Filter copy of data array
-        dataCopy = dataCopy.filter(function (advert) {
-          return advert.offer.type === housingType.value;
+      // Define all filter controls
+      // - take only checked checkboxes
+      var controls = filterForm.querySelectorAll('.map__filter, .map__checkbox:checked');
+      // Convert nodeList to array
+      controls = Array.from(controls);
+
+      // Iterate throw array
+      //	controls.forEach(function (el) {
+
+      var comparePrice = function (number, type) {
+        var result;
+        switch (type) {
+          case 'low':
+            if (number < 10000) {
+              result = true;
+            }
+            break;
+          case 'middle':
+            if (number > 10000 && number < 50000) {
+              result = true;
+            }
+            break;
+          case 'high':
+            if (number > 50000) {
+              result = true;
+            }
+            break;
+          default:
+            return false;
+        }
+        return result;
+      };
+
+      var dataFieldMap = {
+        'housing-type': 'type',
+        'housing-price': 'price',
+        'housing-rooms': 'rooms',
+        'housing-guests': 'guests'
+      };
+
+      var castType = function (string) {
+        if (isNaN(string)) {
+          // return string
+          return string;
+        } else {
+          // cast string to number
+          return +string;
+        }
+      };
+
+      // Filter data when control is changed
+      var filterData = function () {
+        // Iterate throw array with form elements (selectors, checkboxes)
+        controls.forEach(function (control) {
+          // Filter data if form element has a value is different from 'any'
+          if (control.value !== 'any') {
+            // Filter data
+            dataCopy = dataCopy.filter(function (advert) {
+              // if change price
+              if (control.id === 'housing-price') {
+                // compare price in data with control gradation
+                return comparePrice(advert.offer.price, control.value);
+              // if change features find checked input value in data
+              } else if (control.name === 'features') {
+                return advert.offer.features.includes(control.value);
+              // if change anything else control
+              } else {
+                // Cast type to number or string
+                return advert.offer[dataFieldMap[control.id]] === castType(control.value);
+              }
+            });
+          }
         });
-      }
+      };
+
+      // Filter data
+      filterData();
+
       // Set up pins on the map using filtered data
       window.pinsAdvert.fillPinContainer(pinTemplate, dataCopy, pinContainer);
     };
 
-    housingType.addEventListener('click', onHousingTypeChange);
+    // Run callback on form is changed
+    filterForm.addEventListener('change', onFilterFormChange);
   };
 
   // Shorten array
