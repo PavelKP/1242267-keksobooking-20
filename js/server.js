@@ -23,8 +23,8 @@ window.server = (function () {
     } else {
       // Handle error response
       if (ErrTextMap[xhr.status]) {
-        // If error exists in map, pass custom message
-        window.utils.showMessagePopup(ErrTextMap[xhr.status], 'error');
+        // If error exists in map, pass custom message to callback
+        onError(ErrTextMap[xhr.status]);
       } else {
         // If no error in map, pass native message
         window.utils.showMessagePopup('Cтатус ответа: ' + xhr.status + ' - ' + xhr.statusText, 'error');

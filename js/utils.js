@@ -64,7 +64,11 @@ window.utils = (function () {
 
   // Show popup if message appears
   var showMessagePopup = function (errorMessage, type) {
-
+		// Find map pin
+		var mainPin = document.querySelector('.map__pin--main');
+		// Disable pin button
+		mainPin.disabled = true;
+		
     if (type !== 'error' && type !== 'success') {
       throw new Error('указан неправильный тип сообщения');
     }
@@ -85,8 +89,11 @@ window.utils = (function () {
         button.removeEventListener('click', onButtonClick);
       }
 
-      document.removeEventListener('mousedown', onDocumentClick);
+      document.removeEventListener('click', onDocumentClick);
       document.removeEventListener('keydown', onPopupEsc);
+			
+			// Enable main pin button
+			mainPin.disabled = false;
     };
 
     // Define callback - for document
@@ -98,7 +105,7 @@ window.utils = (function () {
 
     // unable to close popup before ERROR_POPUP_TIMEOUT have passed
     setTimeout(function () {
-      document.addEventListener('mousedown', onDocumentClick);
+      document.addEventListener('click', onDocumentClick);
     }, window.constants.ERROR_POPUP_TIMEOUT);
 
     // Define callback with button checking - for ESC

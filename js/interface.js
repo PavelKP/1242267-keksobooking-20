@@ -1,6 +1,17 @@
 'use strict';
 
 window.interface = (function () {
+  // Find map pin
+  var mainPin = document.querySelector('.map__pin--main');
+
+  // Define function to show error message after mouseup
+  var onPinMouseup = function (message) {
+    // Show error message
+    window.utils.showMessagePopup(message, 'error');
+    // Remove mouseup listener
+    mainPin.removeEventListener('mouseup', onPinMouseup);
+  };
+
   // Handle successful server response
   var onSuccessLoad = function (xhrReturned) {
     // JSON is expected
@@ -15,13 +26,35 @@ window.interface = (function () {
       // Run interface with data
       startInterface(data);
     } catch (err) {
-      window.utils.showMessagePopup('Получен некорректный JSON: ' + err.message, 'error');
+      // Bind error message to callback function
+      onPinMouseup = onPinMouseup.bind(null, 'Получен некорректный JSON: ' + err.message, 'error');
+      // Show error after mouseup event only
+      // It is needed only after click on main pin
+
+      // Use listener on mouseup because:
+      // on mouse down data is downloading and after error showMessagePopup() starts
+      // function sets 'click' listener on document to close popup
+      // at this moment click has already started, because mouse is down
+      // on mouse up finishes click and popup will close immediately
+      // Start error function after mouseup only
+
+      mainPin.addEventListener('mouseup', onPinMouseup);
       // if error is caught, we won't run interface
     }
-
   };
-  // Handle bad server response
-  var onErrorLoad = function (message) {
+
+  // Handle bad server response - on click
+  var onErrorLoadMouse = function (message) {
+    // Bind error message to callback function
+    onPinMouseup = onPinMouseup.bind(null, message);
+    // Show error after mouseup event only
+    // It is needed only after click on main pin
+    mainPin.addEventListener('mouseup', onPinMouseup);
+  };
+
+  // Handle bad server response - on enter
+  var onErrorLoadEnter = function (message) {
+    // Show popup
     window.utils.showMessagePopup(message, 'error');
   };
 
@@ -35,8 +68,6 @@ window.interface = (function () {
   // - address input
   var addressField = mainFrom.querySelector('#address');
 
-  // Find map pin
-  var mainPin = document.querySelector('.map__pin--main');
   // Find filter form in map
   var mapFilterForm = document.querySelector('.map__filters');
   // Find pin template
@@ -121,10 +152,10 @@ window.interface = (function () {
   // -- without cb in apart variable I can't remove listener
   // Bind arguments to load()
   var cbBindedMouse = window.utils.isMouseLeftDown.bind(null,
-      window.server.load.bind(null, window.constants.SERVER_URL_RECEIVE, onErrorLoad, onSuccessLoad)
+      window.server.load.bind(null, window.constants.SERVER_URL_RECEIVE, onErrorLoadMouse, onSuccessLoad)
   );
   var cbBindedEnter = window.utils.isEnterDown.bind(null,
-      window.server.load.bind(null, window.constants.SERVER_URL_RECEIVE, onErrorLoad, onSuccessLoad)
+      window.server.load.bind(null, window.constants.SERVER_URL_RECEIVE, onErrorLoadEnter, onSuccessLoad)
   );
 
   // Start interface when click on "maffin"
