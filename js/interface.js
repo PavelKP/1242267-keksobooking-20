@@ -3,6 +3,14 @@
 window.interface = (function () {
   // Find map pin
   var mainPin = document.querySelector('.map__pin--main');
+  // Find input type="file" for avatar
+  var avatarInput = document.querySelector('#avatar');
+  // Find avatar preview
+  var avatarPreview = document.querySelector('.ad-form-header__preview img');
+  // Find input type="file" for advert images
+  var imagesInput = document.querySelector('#images');
+  // Find container for images preview
+  var imagesPreviewContainer = document.querySelector('.ad-form__photo');
 
   // Define function to show error message after mouseup
   var onPinMouseup = function (message) {
@@ -43,6 +51,12 @@ window.interface = (function () {
       data = window.filter.cutArray(data, window.constants.MAX_ADVERT_AMOUNT);
       // Run interface with data
       startInterface(data);
+
+      // Call this functions here because in startInterface() they would be doubled after sending data and start interface
+      // Add filter feature to filter form
+      window.filter.addToForm(data);
+      // Add preview feature to avatar
+      window.preview(avatarInput, avatarPreview);
     }
   };
 
@@ -100,8 +114,6 @@ window.interface = (function () {
     mainPin.removeEventListener('keydown', cbBindedEnter);
     // Activate feature to drag mainPin
     window.pinMainMove.activateMainPinMove();
-
-    window.filter.addToForm(data);
   };
 
   // Return interface to initial state
