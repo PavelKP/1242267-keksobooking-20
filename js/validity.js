@@ -117,7 +117,7 @@ window.validity = (function () {
   var resButton = document.querySelector('.ad-form__reset');
 
   // Success handler for data loading
-  var onSuccess = function () {
+  var onSuccessUpload = function () {
     // Reset form
     mainFrom.reset();
     // Set interface to default state
@@ -127,7 +127,7 @@ window.validity = (function () {
   };
 
   // Error handler for data loading
-  var onError = function (errorMessage) {
+  var onErrorUpload = function (errorMessage) {
     // Show popup with error
     window.utils.showMessagePopup(errorMessage, 'error');
     // Enable submit button
@@ -187,7 +187,7 @@ window.validity = (function () {
     // If form is valid, send data to server
     if (mainFrom.reportValidity()) {
       // Collect form data and send
-      window.server.upload(new FormData(mainFrom), onError, onSuccess);
+      window.server.upload(new FormData(mainFrom), onErrorUpload, onSuccessUpload);
 
       // Disable submit button
       submit.disabled = true;

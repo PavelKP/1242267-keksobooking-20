@@ -64,6 +64,10 @@ window.utils = (function () {
 
   // Show popup if message appears
   var showMessagePopup = function (errorMessage, type) {
+    // Find map pin
+    var mainPin = document.querySelector('.map__pin--main');
+    // Disable pin button
+    mainPin.disabled = true;
 
     if (type !== 'error' && type !== 'success') {
       throw new Error('указан неправильный тип сообщения');
@@ -85,8 +89,11 @@ window.utils = (function () {
         button.removeEventListener('click', onButtonClick);
       }
 
-      document.removeEventListener('mousedown', onDocumentClick);
+      document.removeEventListener('click', onDocumentClick);
       document.removeEventListener('keydown', onPopupEsc);
+
+      // Enable main pin button
+      mainPin.disabled = false;
     };
 
     // Define callback - for document
@@ -95,12 +102,19 @@ window.utils = (function () {
     // on mouse down data is downloading and this function starts
     // at this moment click has already started (???)
     // on mouse up finishes click and popup will close immediately
-    document.addEventListener('mousedown', onDocumentClick);
+
+    // unable to close popup before ERROR_POPUP_TIMEOUT have passed
+    setTimeout(function () {
+      document.addEventListener('click', onDocumentClick);
+    }, window.constants.ERROR_POPUP_TIMEOUT);
 
     // Define callback with button checking - for ESC
     var onPopupEsc = isEscDown.bind(null, removePopup);
     // Add listener - close popup on ESC
-    document.addEventListener('keydown', onPopupEsc);
+    // unable to close popup before ERROR_POPUP_TIMEOUT have passed
+    setTimeout(function () {
+      document.addEventListener('keydown', onPopupEsc);
+    }, window.constants.ERROR_POPUP_TIMEOUT);
 
     if (type === 'error') {
       // Define callback - for button
@@ -108,7 +122,11 @@ window.utils = (function () {
       // Find close button
       var button = templateClone.querySelector('.error__button');
       // Add listener - close popup on button click
-      button.addEventListener('click', onButtonClick);
+      // unable to close popup before ERROR_POPUP_TIMEOUT have passed
+      setTimeout(function () {
+        button.addEventListener('click', onButtonClick);
+      }, window.constants.ERROR_POPUP_TIMEOUT);
+
       // Find message container
       var textEl = templateClone.querySelector('.error__message');
       // Set message
