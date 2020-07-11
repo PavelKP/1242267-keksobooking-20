@@ -64,11 +64,11 @@ window.utils = (function () {
 
   // Show popup if message appears
   var showMessagePopup = function (errorMessage, type) {
-		// Find map pin
-		var mainPin = document.querySelector('.map__pin--main');
-		// Disable pin button
-		mainPin.disabled = true;
-		
+    // Find map pin
+    var mainPin = document.querySelector('.map__pin--main');
+    // Disable pin button
+    mainPin.disabled = true;
+
     if (type !== 'error' && type !== 'success') {
       throw new Error('указан неправильный тип сообщения');
     }
@@ -91,9 +91,9 @@ window.utils = (function () {
 
       document.removeEventListener('click', onDocumentClick);
       document.removeEventListener('keydown', onPopupEsc);
-			
-			// Enable main pin button
-			mainPin.disabled = false;
+
+      // Enable main pin button
+      mainPin.disabled = false;
     };
 
     // Define callback - for document

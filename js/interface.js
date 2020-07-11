@@ -20,11 +20,6 @@ window.interface = (function () {
     try {
       // Check data format
       var data = JSON.parse(rawResult);
-
-      // Shorten array
-      data = window.filter.cutArray(data, window.constants.MAX_ADVERT_AMOUNT);
-      // Run interface with data
-      startInterface(data);
     } catch (err) {
       // Bind error message to callback function
       onPinMouseup = onPinMouseup.bind(null, 'Получен некорректный JSON: ' + err.message, 'error');
@@ -40,6 +35,14 @@ window.interface = (function () {
 
       mainPin.addEventListener('mouseup', onPinMouseup);
       // if error is caught, we won't run interface
+    }
+
+    // Check twice to remain in try/catch only JSON checking
+    if (typeof data === 'object') {
+      // Shorten array
+      data = window.filter.cutArray(data, window.constants.MAX_ADVERT_AMOUNT);
+      // Run interface with data
+      startInterface(data);
     }
   };
 
@@ -98,7 +101,7 @@ window.interface = (function () {
     // Activate feature to drag mainPin
     window.pinMainMove.activateMainPinMove();
 
-    window.filter.addToHousingType(data);
+    window.filter.addToForm(data);
   };
 
   // Return interface to initial state

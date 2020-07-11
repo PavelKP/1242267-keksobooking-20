@@ -10,8 +10,8 @@ window.filter = (function () {
   // Find filter form
   var filterForm = document.querySelector('.map__filters');
 
-  // Set filter to housing type
-  var addToHousingType = function (data) {
+  // Set filter to filter form
+  var addToForm = function (data) {
 
     // Render pins sorted by changed control
     var onFilterFormChange = function () {
@@ -111,8 +111,9 @@ window.filter = (function () {
       window.pinsAdvert.fillPinContainer(pinTemplate, dataCopy, pinContainer);
     };
 
+    var onFilterFormChangeDebounced = window.debounce(onFilterFormChange);
     // Run callback on form is changed
-    filterForm.addEventListener('change', onFilterFormChange);
+    filterForm.addEventListener('change', onFilterFormChangeDebounced);
   };
 
   // Shorten array
@@ -121,7 +122,7 @@ window.filter = (function () {
   };
 
   return {
-    addToHousingType: addToHousingType,
+    addToForm: addToForm,
     cutArray: cutArray
   };
 
