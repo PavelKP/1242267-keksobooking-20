@@ -1,11 +1,11 @@
 'use strict';
 
-(function () {
+window.preview = (function () {
   // Define file types
   var FILE_TYPES = ['png', 'jpeg', 'jpg'];
 
   // Define preview function
-  window.preview = function (fileChooser, image) {
+  var showOnePicture = function (fileChooser, container, onLoadReading) {
 
     fileChooser.addEventListener('change', function () {
       // Choose first file
@@ -24,9 +24,7 @@
         var reader = new FileReader();
 
         // Callback will run after reader loads (read) file
-        reader.addEventListener('load', function () {
-          image.src = reader.result;
-        });
+        reader.addEventListener('load', onLoadReading.bind(null, reader, container));
 
         // Start reader (asynchronous???)
         // Pass file pseudo object
@@ -39,6 +37,10 @@
 
     });
 
+  };
+
+  return {
+    showOnePicture: showOnePicture
   };
 
 })();

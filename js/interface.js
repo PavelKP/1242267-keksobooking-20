@@ -5,8 +5,8 @@ window.interface = (function () {
   var mainPin = document.querySelector('.map__pin--main');
   // Find input type="file" for avatar
   var avatarInput = document.querySelector('#avatar');
-  // Find avatar preview
-  var avatarPreview = document.querySelector('.ad-form-header__preview img');
+  // Find container for avatar preview
+  var avatarPreviewContainer = document.querySelector('.ad-form-header__preview');
   // Find input type="file" for advert images
   var imagesInput = document.querySelector('#images');
   // Find container for images preview
@@ -56,7 +56,9 @@ window.interface = (function () {
       // Add filter feature to filter form
       window.filter.addToForm(data);
       // Add preview feature to avatar
-      window.preview(avatarInput, avatarPreview);
+      window.preview.showOnePicture(avatarInput, avatarPreviewContainer, setImage);
+      // Add preview feature to advert pictures
+      window.preview.showOnePicture(imagesInput, imagesPreviewContainer, setImage);
     }
   };
 
@@ -73,6 +75,24 @@ window.interface = (function () {
   var onErrorLoadEnter = function (message) {
     // Show popup
     window.utils.showMessagePopup(message, 'error');
+  };
+
+  // Set advert preview pictures
+  var setImage = function (reader, container) {
+    // If there is no images in container
+    if (!container.children[0]) {
+      // Create element
+      var img = document.createElement('img');
+      // Set Data url as src
+      img.src = reader.result;
+      // Set alt text
+      img.alt = 'Фото объекта недвижимости';
+      // Add image to end of container
+      container.appendChild(img);
+    } else {
+      // Change src to data url
+      container.children[0].src = reader.result;
+    }
   };
 
   // Find form for adding new advert
