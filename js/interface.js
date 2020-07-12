@@ -87,6 +87,9 @@ window.interface = (function () {
       img.src = reader.result;
       // Set alt text
       img.alt = 'Фото объекта недвижимости';
+      // Set dimensions
+      // img.width - doesn't work!!! why?
+      img.setAttribute('width', '100%');
       // Add image to end of container
       container.appendChild(img);
     } else {
@@ -156,6 +159,9 @@ window.interface = (function () {
     pinContainer.removeEventListener('click', window.cb);
     // Remove current popup card
     document.querySelector('.map__card').remove();
+    // Remove all preview images
+    avatarPreviewContainer.children[0].remove();
+    imagesPreviewContainer.children[0].remove();
 
     // Start interface when click on "maffin"
     mainPin.addEventListener('mousedown', cbBindedMouse);
