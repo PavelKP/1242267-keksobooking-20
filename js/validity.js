@@ -169,7 +169,7 @@ window.validity = (function () {
   // Add listener to reset button - for what???
   resButton.addEventListener('click', function (evt) {
     evt.preventDefault();
-    mainFrom.reset();
+    window.interface.shutInterface();
   });
 
   // It is needed if we don't change any control
