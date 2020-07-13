@@ -48,7 +48,7 @@ window.interface = (function () {
     // Check twice to remain in try/catch only JSON checking
     if (typeof data === 'object') {
       // Shorten array
-      data = window.filter.cutArray(data, window.constants.MAX_ADVERT_AMOUNT);
+      // data = window.filter.cutArray(data, window.constants.MAX_ADVERT_AMOUNT);
       // Run interface with data
       startInterface(data);
 
@@ -100,6 +100,8 @@ window.interface = (function () {
 
   // Find form for adding new advert
   var mainFrom = document.querySelector('.ad-form');
+  // Find filter form
+  var filterForm = document.querySelector('.map__filters');
   // Find form elements:
   // - accommodation type input
   var typeInput = mainFrom.querySelector('#type');
@@ -159,9 +161,21 @@ window.interface = (function () {
     pinContainer.removeEventListener('click', window.cb);
     // Remove current popup card
     document.querySelector('.map__card').remove();
-    // Remove all preview images
-    avatarPreviewContainer.children[0].remove();
-    imagesPreviewContainer.children[0].remove();
+
+    // Remove preview images if they exist
+    if (avatarPreviewContainer.children[0]) {
+      // Set default image src (muffin)
+      avatarPreviewContainer.children[0].src = window.constants.DEFAULT_AVATAR_SRC;
+    }
+    if (imagesPreviewContainer.children[0]) {
+      imagesPreviewContainer.children[0].remove();
+    }
+    // Reset forms
+    filterForm.reset();
+    mainFrom.reset();
+
+    // Set default position of map pin in address input (Round pin)
+    addressField.value = window.pinMain.getCurrentPosition(mainPin);
 
     // Start interface when click on "maffin"
     mainPin.addEventListener('mousedown', cbBindedMouse);

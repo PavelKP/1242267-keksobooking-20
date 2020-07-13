@@ -143,11 +143,39 @@ window.popupCard = (function () {
     popup.hidden = true;
     // Remove ESC listener from document
     document.removeEventListener('keydown', onPopupEscPress);
+    // Remove pressed style from pin
+    removePinPressed();
   };
 
   // Callback to invoke closePopup() on ESC down
   var onPopupEscPress = function (evt) {
     window.utils.isEscDown(closePopup, evt);
+  };
+
+  // Remove pressed style from pin
+  var removePinPressed = function () {
+    // Find pressed pin
+    var pressedPin = pinContainer.querySelector('.map__pin--active');
+    // If pressed pin exists
+    if (pressedPin) {
+      // Remove pressed class
+      pressedPin.classList.remove('map__pin--active');
+    }
+  };
+
+  // Add pressed style on pin
+  var makePinPressed = function (evt, type) {
+    // Remove pressed style from previous pin
+    removePinPressed();
+    if (type === 'parent') {
+      // Add pressed style to parent node
+      evt.target.parentNode.classList.add('map__pin--active');
+    } else if (type === 'node') {
+      // Add pressed style to curent node (in evt)
+      evt.target.classList.add('map__pin--active');
+    } else {
+      throw new Error('Wrong type in function makePinPressed()');
+    }
   };
 
   // Show card - fetch card from array by id, put it in HTML, add listeners
@@ -157,10 +185,15 @@ window.popupCard = (function () {
     if (evt.target && evt.target.matches('.map__pin:not(.map__pin--main) img')) {
       // Find id in parent element
       id = evt.target.parentNode.dataset.id;
+      // Add pressed style on current pin (to parent node)
+      makePinPressed(evt, 'parent');
+
       // Catch click on button (not in main pin)
     } else if (evt.target && evt.target.matches('.map__pin:not(.map__pin--main)')) {
       // Find id in target element
       id = evt.target.dataset.id;
+      // Add pressed style on current pin (to current node)
+      makePinPressed(evt, 'node');
     }
     // Find a temporary element or previous created card
     var previous = map.querySelector('.map__card');
