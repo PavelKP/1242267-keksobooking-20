@@ -4,8 +4,8 @@ window.validity = (function () {
   // ----------- Form elements ------------//
   // Find form for adding new advert
   var mainFrom = document.querySelector('.ad-form');
-  var roomNumber = mainFrom.querySelector('#room_number');
-  var capacity = mainFrom.querySelector('#capacity');
+  var roomNumberInput = mainFrom.querySelector('#room_number');
+  var capacityInput = mainFrom.querySelector('#capacity');
   var submit = mainFrom.querySelector('.ad-form__submit');
   var typeInput = mainFrom.querySelector('#type');
   var priceInput = mainFrom.querySelector('#price');
@@ -15,7 +15,7 @@ window.validity = (function () {
   var resButton = document.querySelector('.ad-form__reset');
 
 
-  var formWithOutlineArray = [roomNumber, capacity, priceInput, titleInput];
+  var formWithOutlineArray = [roomNumberInput, capacityInput, priceInput, titleInput];
   // Remove all outlines
   var resetOutline = function () {
     formWithOutlineArray.forEach(function (el) {
@@ -151,12 +151,12 @@ window.validity = (function () {
   };
 
   // If change room number check condition
-  roomNumber.addEventListener('change', function () {
-    compareRoomsAndCapacity(roomNumber, capacity);
+  roomNumberInput.addEventListener('change', function () {
+    compareRoomsAndCapacity(roomNumberInput, capacityInput);
   });
   // If change capacity check condition
-  capacity.addEventListener('change', function () {
-    compareRoomsAndCapacity(roomNumber, capacity);
+  capacityInput.addEventListener('change', function () {
+    compareRoomsAndCapacity(roomNumberInput, capacityInput);
   });
   // If change accommodation type - change price limit, validate price
   typeInput.addEventListener('change', function () {
@@ -195,7 +195,7 @@ window.validity = (function () {
     // Else we get native browser validation message
     validateInputTextLive(titleInput);
     validateInputNumber(priceInput);
-    compareRoomsAndCapacity(roomNumber, capacity);
+    compareRoomsAndCapacity(roomNumberInput, capacityInput);
 
     // Prevent page reloading
     evt.preventDefault();
