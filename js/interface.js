@@ -166,6 +166,8 @@ window.interface = (function () {
     mainPin.addEventListener('keydown', cbBindedEnter);
     // Prepare interface to activate om mousedown + add pin movement
     window.pinMainMove.activateInterfaceOnPinDown();
+    // Reset form element outlines
+    window.validity.resetOutline();
   };
 
   // Prepare interface after page is loaded

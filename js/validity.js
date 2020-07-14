@@ -1,6 +1,28 @@
 'use strict';
 
 window.validity = (function () {
+  // ----------- Form elements ------------//
+  // Find form for adding new advert
+  var mainFrom = document.querySelector('.ad-form');
+  var roomNumber = mainFrom.querySelector('#room_number');
+  var capacity = mainFrom.querySelector('#capacity');
+  var submit = mainFrom.querySelector('.ad-form__submit');
+  var typeInput = mainFrom.querySelector('#type');
+  var priceInput = mainFrom.querySelector('#price');
+  var timeInInput = mainFrom.querySelector('#timein');
+  var timeOutInput = mainFrom.querySelector('#timeout');
+  var titleInput = mainFrom.querySelector('#title');
+  var resButton = document.querySelector('.ad-form__reset');
+
+
+  var formWithOutlineArray = [roomNumber, capacity, priceInput, titleInput];
+  // Remove all outlines
+  var resetOutline = function () {
+    formWithOutlineArray.forEach(function (el) {
+      el.style.outline = 'none';
+    });
+  };
+
   // Show red outline if form is invalid
   var setRedOutline = function (element) {
     if (element.validity.customError) {
@@ -110,28 +132,6 @@ window.validity = (function () {
     setRedOutline(element);
   };
 
-  // ----------- Form elements ------------//
-  // Find form for adding new advert
-  var mainFrom = document.querySelector('.ad-form');
-  // Find filter in map
-  var roomNumber = mainFrom.querySelector('#room_number');
-  // Find room capacity input
-  var capacity = mainFrom.querySelector('#capacity');
-  // Find submit form button
-  var submit = mainFrom.querySelector('.ad-form__submit');
-  // Find accommodation type input
-  var typeInput = mainFrom.querySelector('#type');
-  // Find min price input
-  var priceInput = mainFrom.querySelector('#price');
-  // Find checkin time select
-  var timeInInput = mainFrom.querySelector('#timein');
-  // Find checkout time select
-  var timeOutInput = mainFrom.querySelector('#timeout');
-  // Find title input
-  var titleInput = mainFrom.querySelector('#title');
-  // Find reset button
-  var resButton = document.querySelector('.ad-form__reset');
-
   // Success handler for data loading
   var onSuccessUpload = function () {
     // Reset form
@@ -211,7 +211,8 @@ window.validity = (function () {
   });
 
   return {
-    setMinPriceLimit: setMinPriceLimit
+    setMinPriceLimit: setMinPriceLimit,
+    resetOutline: resetOutline
   };
 
 })();
