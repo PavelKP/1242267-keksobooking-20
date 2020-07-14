@@ -1,22 +1,18 @@
 'use strict';
 
 window.pinMainMove = (function () {
-  // Height of mainPin
+  // Dimensions of mainPin
   var PIN_HEIGHT = 87;
-  // Width of mainPin
   var PIN_WIDTH = 65;
-
-  // mainPin default left
+	
+  // mainPin default position
   var PIN_LEFT_DEFAULT = 570;
-  // mainPin default top
   var PIN_TOP_DEFAULT = 375;
 
-  // Find map pin
-  var mainPin = document.querySelector('.map__pin--main');
-  // Find map
-  var map = document.querySelector('.map');
-  // - address input
-  var addressField = document.querySelector('#address');
+  // Find HTML elements
+  var mainPin = document.querySelector('.map__pin--main'),
+			map = document.querySelector('.map'),
+			addressField = document.querySelector('#address');
 
   // Define empty variables, all functions can use it like a buffer
   var startCoords = {};
@@ -122,12 +118,22 @@ window.pinMainMove = (function () {
 
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
+		
+		// If interface is switched off
+		// load data and start interface after data loading
+		if (!window.interface.flag) {
+			window.server.load(window.constants.SERVER_URL_RECEIVE, window.interface.onErrorLoadMouse, window.interface.onSuccessLoad);
+		}
   };
 
-  // Start main pin movement on mouse down
-  var activateMainPinMove = function () {
-    mainPin.addEventListener('mousedown', onMouseDown);
+	// Add mouse button checking to callback (only left button)
+	var onMouseDown = window.utils.isMouseLeftDown.bind(null, onMouseDown);
+  
+	// Start main pin movement on mouse down
+  var activateInterfaceOnPinDown = function () {
+    mainPin.addEventListener('mousedown', onMouseDown);		
   };
+	
   // Stop main pin movement on mouse down
   var stopMainPinMove = function () {
     mainPin.removeEventListener('mousedown', onMouseDown);
@@ -139,7 +145,7 @@ window.pinMainMove = (function () {
   };
 
   return {
-    activateMainPinMove: activateMainPinMove,
+    activateInterfaceOnPinDown: activateInterfaceOnPinDown,
     stopMainPinMove: stopMainPinMove,
     setDefaultPosition: setDefaultPosition
   };

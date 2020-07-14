@@ -1,6 +1,15 @@
 'use strict';
 
 window.validity = (function () {
+	// Show red outline if form is invalid
+	var setRedOutline = function (element) {
+		if (element.validity.customError) {
+			element.style.outline = '4px solid red';
+		} else {
+			element.style.outline = 'none';
+		}
+	};
+
   // Set dynamic price placeholder and minimum limit
   var setMinPriceLimit = function (recipient, donorInput) {
     // Take a min price from library
@@ -37,6 +46,9 @@ window.validity = (function () {
     // Force fire validity event
     roomNumber.reportValidity();
     capacity.reportValidity();
+		// Show red outline if invalid
+		setRedOutline(roomNumber);
+		setRedOutline(capacity);
   };
 
   // Make checkin=checkout and vice versa
@@ -68,7 +80,9 @@ window.validity = (function () {
       element.setCustomValidity('');
     }
     // Force fire validity event
+		// Show red outline if invalid
     element.reportValidity();
+		setRedOutline(element);
   };
 
   // Live text input validation
@@ -91,7 +105,9 @@ window.validity = (function () {
       element.setCustomValidity('');
     }
     // Force fire validity event
+		// Show red outline if invalid
     element.reportValidity();
+		setRedOutline(element);
   };
 
   // ----------- Form elements ------------//

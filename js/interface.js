@@ -1,22 +1,32 @@
 'use strict';
 
 window.interface = (function () {
-  // Find map pin
-  var mainPin = document.querySelector('.map__pin--main');
-  // Find input type="file" for avatar
-  var avatarInput = document.querySelector('#avatar');
-  // Find container for avatar preview
-  var avatarPreviewContainer = document.querySelector('.ad-form-header__preview');
-  // Find input type="file" for advert images
-  var imagesInput = document.querySelector('#images');
-  // Find container for images preview
-  var imagesPreviewContainer = document.querySelector('.ad-form__photo');
+	// Interface isn't started
+	var flag;
+			
+  // Find HTML elemets
+  var mainPin = document.querySelector('.map__pin--main'),
+			avatarInput = document.querySelector('#avatar'),
+			avatarPreviewContainer = document.querySelector('.ad-form-header__preview'),
+			imagesInput = document.querySelector('#images'),
+			imagesPreviewContainer = document.querySelector('.ad-form__photo'),
+			mainFrom = document.querySelector('.ad-form'),
+			filterForm = document.querySelector('.map__filters'),
+			typeInput = mainFrom.querySelector('#type'),
+			priceInput = mainFrom.querySelector('#price'),
+			addressField = mainFrom.querySelector('#address'),
+			mapFilterForm = document.querySelector('.map__filters'),
+			pinContainer = document.querySelector('.map__pins');
+  // Find templates
+  var pinTemplate = document.querySelector('#pin')
+			.content
+			.querySelector('.map__pin');
 
-  // Define function to show error message after mouseup
+	// Define function to show error message after mouseup
   var onPinMouseup = function (message) {
     // Show error message
+		// Remove mouseup listener
     window.utils.showMessagePopup(message, 'error');
-    // Remove mouseup listener
     mainPin.removeEventListener('mouseup', onPinMouseup);
   };
 
@@ -33,7 +43,6 @@ window.interface = (function () {
       onPinMouseup = onPinMouseup.bind(null, 'Получен некорректный JSON: ' + err.message, 'error');
       // Show error after mouseup event only
       // It is needed only after click on main pin
-
       // Use listener on mouseup because:
       // on mouse down data is downloading and after error showMessagePopup() starts
       // function sets 'click' listener on document to close popup
@@ -53,11 +62,10 @@ window.interface = (function () {
       startInterface(data);
 
       // Call this functions here because in startInterface() they would be doubled after sending data and start interface
-      // Add filter feature to filter form
+      // Add filter feature to filter form      
+			// Add preview feature to avatar and advert pictures
       window.filter.addToForm(data);
-      // Add preview feature to avatar
       window.preview.showOnePicture(avatarInput, avatarPreviewContainer, setImage);
-      // Add preview feature to advert pictures
       window.preview.showOnePicture(imagesInput, imagesPreviewContainer, setImage);
     }
   };
@@ -65,9 +73,9 @@ window.interface = (function () {
   // Handle bad server response - on click
   var onErrorLoadMouse = function (message) {
     // Bind error message to callback function
-    onPinMouseup = onPinMouseup.bind(null, message);
-    // Show error after mouseup event only
+		// Show error after mouseup event only
     // It is needed only after click on main pin
+    onPinMouseup = onPinMouseup.bind(null, message);
     mainPin.addEventListener('mouseup', onPinMouseup);
   };
 
@@ -82,15 +90,14 @@ window.interface = (function () {
     // If there is no images in container
     if (!container.children[0]) {
       // Create element
+			// Set Data url as src
+			// Set alt text
+			// Set dimensions
+			// Add image to end of container
       var img = document.createElement('img');
-      // Set Data url as src
       img.src = reader.result;
-      // Set alt text
       img.alt = 'Фото объекта недвижимости';
-      // Set dimensions
-      // img.width - doesn't work!!! why?
-      img.setAttribute('width', '100%');
-      // Add image to end of container
+      img.setAttribute('width', '100%'); // img.width - doesn't work!!! why?
       container.appendChild(img);
     } else {
       // Change src to data url
@@ -98,51 +105,30 @@ window.interface = (function () {
     }
   };
 
-  // Find form for adding new advert
-  var mainFrom = document.querySelector('.ad-form');
-  // Find filter form
-  var filterForm = document.querySelector('.map__filters');
-  // Find form elements:
-  // - accommodation type input
-  var typeInput = mainFrom.querySelector('#type');
-  // - min price input
-  var priceInput = mainFrom.querySelector('#price');
-  // - address input
-  var addressField = mainFrom.querySelector('#address');
-
-  // Find filter form in map
-  var mapFilterForm = document.querySelector('.map__filters');
-  // Find pin template
-  var pinTemplate = document.querySelector('#pin')
-    .content
-    .querySelector('.map__pin');
-  // Find pin container
-  var pinContainer = document.querySelector('.map__pins');
-
   // Collect and run all functions to start interface
   var startInterface = function (data) {
+		console.log(1);
+		window.interface.flag = true;
+				
     // Remove disable attributes from form elements
+		// Remove hiding classes
+		// Set up pins on the map
+		// Set coordinates value in address input (Sharp pin)
     window.visibility.disableFromElements(mainFrom, ['input', 'select', 'textarea', 'button'], false);
     window.visibility.disableFromElements(mapFilterForm, ['input', 'select'], false);
-    // Remove hiding classes
     window.visibility.changeVisibility();
-    // Set up pins on the map
     window.pinsAdvert.fillPinContainer(pinTemplate, data, pinContainer);
-
-    // Set coordinates value in address input (Sharp pin)
     // The last argument of getCurrentPosition() is length of sharp tail
     addressField.value = window.pinMain.getCurrentPosition(mainPin, 22);
 
-    // Remove listeners - we can click on MainPin and start interface only one time
-    // If don't do this, we get second and third mousemove listeners, drag feature will work wrong
-    mainPin.removeEventListener('mousedown', cbBindedMouse);
-    mainPin.removeEventListener('keydown', cbBindedEnter);
-    // Activate feature to drag mainPin
-    window.pinMainMove.activateMainPinMove();
+    // Remove listeners - press Enter on MainPin and start interface only one time
+    mainPin.removeEventListener('keydown', cbBindedEnter);		
   };
 
   // Return interface to initial state
   var shutInterface = function () {
+		window.interface.flag = false;
+		
     // Disable from elements
     window.visibility.disableFromElements(mainFrom, ['input', 'select', 'textarea', 'button'], true);
     window.visibility.disableFromElements(mapFilterForm, ['input', 'select'], true);
@@ -177,10 +163,10 @@ window.interface = (function () {
     // Set default position of map pin in address input (Round pin)
     addressField.value = window.pinMain.getCurrentPosition(mainPin);
 
-    // Start interface when click on "maffin"
-    mainPin.addEventListener('mousedown', cbBindedMouse);
-    // Start interface on press "Enter"
+    // Prepare interface to activate on press "Enter"
     mainPin.addEventListener('keydown', cbBindedEnter);
+		// Prepare interface to activate om mousedown + add pin movement
+		window.pinMainMove.activateInterfaceOnPinDown();
   };
 
   // Prepare interface after page is loaded
@@ -197,29 +183,26 @@ window.interface = (function () {
     window.visibility.disableFromElements(mapFilterForm, ['input', 'select']);
   };
 
-  // --------Lock interface by default
-  setDefaultInterface();
-
-  // --------Unlock interface
-  // --------Only after successful data loading
   // Bind key checking functions and load() function
   // -- evt object from listener will be the last arg in .bind()
   // -- without cb in apart variable I can't remove listener
-  // Bind arguments to load()
-  var cbBindedMouse = window.utils.isMouseLeftDown.bind(null,
-      window.server.load.bind(null, window.constants.SERVER_URL_RECEIVE, onErrorLoadMouse, onSuccessLoad)
-  );
-  var cbBindedEnter = window.utils.isEnterDown.bind(null,
-      window.server.load.bind(null, window.constants.SERVER_URL_RECEIVE, onErrorLoadEnter, onSuccessLoad)
-  );
-
-  // Start interface when click on "maffin"
-  mainPin.addEventListener('mousedown', cbBindedMouse);
-  // Start interface on press "Enter"
-  mainPin.addEventListener('keydown', cbBindedEnter);
+	var cbBindedEnter = window.utils.isEnterDown.bind(null,
+		window.server.load.bind(null, window.constants.SERVER_URL_RECEIVE, onErrorLoadEnter, onSuccessLoad)
+	);
+	
+  // Prepare interface on press "Enter"
+	var activateInterfaceOnPinEnter = function () {
+		mainPin.addEventListener('keydown', cbBindedEnter);
+	}
 
   return {
-    shutInterface: shutInterface
+    shutInterface: shutInterface,
+		startInterface: startInterface,
+		setDefaultInterface: setDefaultInterface,
+		activateInterfaceOnPinEnter: activateInterfaceOnPinEnter,
+		flag: flag,
+		onErrorLoadMouse: onErrorLoadMouse,
+		onSuccessLoad: onSuccessLoad
   };
 
 })();

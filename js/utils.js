@@ -58,7 +58,7 @@ window.utils = (function () {
   var isMouseLeftDown = function (cb, evt) {
     if (evt.button === 0) {
       evt.preventDefault();
-      cb();
+      cb(evt);
     }
   };
 
