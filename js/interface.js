@@ -1,31 +1,31 @@
 'use strict';
 
 window.interface = (function () {
-	// Interface isn't started
-	var flag;
-			
-  // Find HTML elemets
-  var mainPin = document.querySelector('.map__pin--main'),
-			avatarInput = document.querySelector('#avatar'),
-			avatarPreviewContainer = document.querySelector('.ad-form-header__preview'),
-			imagesInput = document.querySelector('#images'),
-			imagesPreviewContainer = document.querySelector('.ad-form__photo'),
-			mainFrom = document.querySelector('.ad-form'),
-			filterForm = document.querySelector('.map__filters'),
-			typeInput = mainFrom.querySelector('#type'),
-			priceInput = mainFrom.querySelector('#price'),
-			addressField = mainFrom.querySelector('#address'),
-			mapFilterForm = document.querySelector('.map__filters'),
-			pinContainer = document.querySelector('.map__pins');
+  // Interface isn't started
+  var flag;
+
+  // Find HTML elements
+  var mainPin = document.querySelector('.map__pin--main');
+  var avatarInput = document.querySelector('#avatar');
+  var avatarPreviewContainer = document.querySelector('.ad-form-header__preview');
+  var imagesInput = document.querySelector('#images');
+  var imagesPreviewContainer = document.querySelector('.ad-form__photo');
+  var mainFrom = document.querySelector('.ad-form');
+  var	filterForm = document.querySelector('.map__filters');
+  var	typeInput = mainFrom.querySelector('#type');
+  var	priceInput = mainFrom.querySelector('#price');
+  var	addressField = mainFrom.querySelector('#address');
+  var	mapFilterForm = document.querySelector('.map__filters');
+  var	pinContainer = document.querySelector('.map__pins');
   // Find templates
   var pinTemplate = document.querySelector('#pin')
 			.content
 			.querySelector('.map__pin');
 
-	// Define function to show error message after mouseup
+  // Define function to show error message after mouseup
   var onPinMouseup = function (message) {
     // Show error message
-		// Remove mouseup listener
+  // Remove mouseup listener
     window.utils.showMessagePopup(message, 'error');
     mainPin.removeEventListener('mouseup', onPinMouseup);
   };
@@ -62,8 +62,8 @@ window.interface = (function () {
       startInterface(data);
 
       // Call this functions here because in startInterface() they would be doubled after sending data and start interface
-      // Add filter feature to filter form      
-			// Add preview feature to avatar and advert pictures
+      // Add filter feature to filter form
+      // Add preview feature to avatar and advert pictures
       window.filter.addToForm(data);
       window.preview.showOnePicture(avatarInput, avatarPreviewContainer, setImage);
       window.preview.showOnePicture(imagesInput, imagesPreviewContainer, setImage);
@@ -73,7 +73,7 @@ window.interface = (function () {
   // Handle bad server response - on click
   var onErrorLoadMouse = function (message) {
     // Bind error message to callback function
-		// Show error after mouseup event only
+    // Show error after mouseup event only
     // It is needed only after click on main pin
     onPinMouseup = onPinMouseup.bind(null, message);
     mainPin.addEventListener('mouseup', onPinMouseup);
@@ -90,10 +90,10 @@ window.interface = (function () {
     // If there is no images in container
     if (!container.children[0]) {
       // Create element
-			// Set Data url as src
-			// Set alt text
-			// Set dimensions
-			// Add image to end of container
+      // Set Data url as src
+      // Set alt text
+      // Set dimensions
+      // Add image to end of container
       var img = document.createElement('img');
       img.src = reader.result;
       img.alt = 'Фото объекта недвижимости';
@@ -107,13 +107,12 @@ window.interface = (function () {
 
   // Collect and run all functions to start interface
   var startInterface = function (data) {
-		console.log(1);
-		window.interface.flag = true;
-				
+    window.interface.flag = true;
+
     // Remove disable attributes from form elements
-		// Remove hiding classes
-		// Set up pins on the map
-		// Set coordinates value in address input (Sharp pin)
+    // Remove hiding classes
+    // Set up pins on the map
+    // Set coordinates value in address input (Sharp pin)
     window.visibility.disableFromElements(mainFrom, ['input', 'select', 'textarea', 'button'], false);
     window.visibility.disableFromElements(mapFilterForm, ['input', 'select'], false);
     window.visibility.changeVisibility();
@@ -122,13 +121,13 @@ window.interface = (function () {
     addressField.value = window.pinMain.getCurrentPosition(mainPin, 22);
 
     // Remove listeners - press Enter on MainPin and start interface only one time
-    mainPin.removeEventListener('keydown', cbBindedEnter);		
+    mainPin.removeEventListener('keydown', cbBindedEnter);
   };
 
   // Return interface to initial state
   var shutInterface = function () {
-		window.interface.flag = false;
-		
+    window.interface.flag = false;
+
     // Disable from elements
     window.visibility.disableFromElements(mainFrom, ['input', 'select', 'textarea', 'button'], true);
     window.visibility.disableFromElements(mapFilterForm, ['input', 'select'], true);
@@ -165,8 +164,8 @@ window.interface = (function () {
 
     // Prepare interface to activate on press "Enter"
     mainPin.addEventListener('keydown', cbBindedEnter);
-		// Prepare interface to activate om mousedown + add pin movement
-		window.pinMainMove.activateInterfaceOnPinDown();
+    // Prepare interface to activate om mousedown + add pin movement
+    window.pinMainMove.activateInterfaceOnPinDown();
   };
 
   // Prepare interface after page is loaded
@@ -186,23 +185,22 @@ window.interface = (function () {
   // Bind key checking functions and load() function
   // -- evt object from listener will be the last arg in .bind()
   // -- without cb in apart variable I can't remove listener
-	var cbBindedEnter = window.utils.isEnterDown.bind(null,
-		window.server.load.bind(null, window.constants.SERVER_URL_RECEIVE, onErrorLoadEnter, onSuccessLoad)
-	);
-	
+  var cbBindedEnter = window.utils.isEnterDown.bind(null, window.server.load.bind(null, window.constants.SERVER_URL_RECEIVE, onErrorLoadEnter, onSuccessLoad)
+  );
+
   // Prepare interface on press "Enter"
-	var activateInterfaceOnPinEnter = function () {
-		mainPin.addEventListener('keydown', cbBindedEnter);
-	}
+  var activateInterfaceOnPinEnter = function () {
+    mainPin.addEventListener('keydown', cbBindedEnter);
+  };
 
   return {
     shutInterface: shutInterface,
-		startInterface: startInterface,
-		setDefaultInterface: setDefaultInterface,
-		activateInterfaceOnPinEnter: activateInterfaceOnPinEnter,
-		flag: flag,
-		onErrorLoadMouse: onErrorLoadMouse,
-		onSuccessLoad: onSuccessLoad
+    startInterface: startInterface,
+    setDefaultInterface: setDefaultInterface,
+    activateInterfaceOnPinEnter: activateInterfaceOnPinEnter,
+    flag: flag,
+    onErrorLoadMouse: onErrorLoadMouse,
+    onSuccessLoad: onSuccessLoad
   };
 
 })();
