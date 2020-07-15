@@ -11,21 +11,21 @@ window.interface = (function () {
   var imagesInput = document.querySelector('#images');
   var imagesPreviewContainer = document.querySelector('.ad-form__photo');
   var mainFrom = document.querySelector('.ad-form');
-  var	filterForm = document.querySelector('.map__filters');
-  var	typeInput = mainFrom.querySelector('#type');
-  var	priceInput = mainFrom.querySelector('#price');
-  var	addressField = mainFrom.querySelector('#address');
-  var	mapFilterForm = document.querySelector('.map__filters');
-  var	pinContainer = document.querySelector('.map__pins');
+  var filterForm = document.querySelector('.map__filters');
+  var typeInput = mainFrom.querySelector('#type');
+  var priceInput = mainFrom.querySelector('#price');
+  var addressField = mainFrom.querySelector('#address');
+  var mapFilterForm = document.querySelector('.map__filters');
+  var pinContainer = document.querySelector('.map__pins');
   // Find templates
   var pinTemplate = document.querySelector('#pin')
-			.content
-			.querySelector('.map__pin');
+    .content
+    .querySelector('.map__pin');
 
   // Define function to show error message after mouseup
   var onPinMouseup = function (message) {
     // Show error message
-  // Remove mouseup listener
+    // Remove mouseup listener
     window.utils.showMessagePopup(message, 'error');
     mainPin.removeEventListener('mouseup', onPinMouseup);
   };
@@ -116,9 +116,9 @@ window.interface = (function () {
     window.visibility.disableFromElements(mainFrom, ['input', 'select', 'textarea', 'button'], false);
     window.visibility.disableFromElements(mapFilterForm, ['input', 'select'], false);
     window.visibility.changeVisibility();
-    window.pinsAdvert.fillPinContainer(pinTemplate, data, pinContainer);
+    window.advertPins.fillPinContainer(pinTemplate, data, pinContainer);
     // The last argument of getCurrentPosition() is length of sharp tail
-    addressField.value = window.pinMain.getCurrentPosition(mainPin, 22);
+    addressField.value = window.pinMainMove.getCurrentPosition(mainPin, 22);
 
     // Remove listeners - press Enter on MainPin and start interface only one time
     mainPin.removeEventListener('keydown', cbBindedEnter);
@@ -129,58 +129,58 @@ window.interface = (function () {
     window.interface.flag = false;
 
     // Disable from elements
+    // Add hiding classes (transform main pin to default state)
+    // Clear pin container
+    // Stop main pin movement
+    // Set default main pin position
+    // Recalculate and set coordinates (without tail)
     window.visibility.disableFromElements(mainFrom, ['input', 'select', 'textarea', 'button'], true);
     window.visibility.disableFromElements(mapFilterForm, ['input', 'select'], true);
-    // Add hiding classes (transform main pin to default state)
     window.visibility.changeVisibility();
-    // Clear pin container
-    window.pinsAdvert.clearPinContainer(pinContainer);
-    // Stop main pin movement
+    window.advertPins.clearPinContainer(pinContainer);
     window.pinMainMove.stopMainPinMove();
-    // Set default main pin position
     window.pinMainMove.setDefaultPosition();
-    // Recalculate and set coordinates (without tail)
-    addressField.value = window.pinMain.getCurrentPosition(mainPin);
+    addressField.value = window.pinMainMove.getCurrentPosition(mainPin);
+
     // Remove click handler from pin container
     // Get cb from global scope
-    pinContainer.removeEventListener('click', window.cb);
     // Remove current popup card
+    pinContainer.removeEventListener('click', window.cb);
     document.querySelector('.map__card').remove();
 
-    // Remove preview images if they exist
+    // Remove preview images and set default avatar (if they exist)
     if (avatarPreviewContainer.children[0]) {
-      // Set default image src (muffin)
       avatarPreviewContainer.children[0].src = window.constants.DEFAULT_AVATAR_SRC;
     }
     if (imagesPreviewContainer.children[0]) {
       imagesPreviewContainer.children[0].remove();
     }
+
     // Reset forms
     filterForm.reset();
     mainFrom.reset();
 
     // Set default position of map pin in address input (Round pin)
-    addressField.value = window.pinMain.getCurrentPosition(mainPin);
-
     // Prepare interface to activate on press "Enter"
-    mainPin.addEventListener('keydown', cbBindedEnter);
-    // Prepare interface to activate om mousedown + add pin movement
-    window.pinMainMove.activateInterfaceOnPinDown();
+    // Prepare interface to activate on mousedown + add pin movement
     // Reset form element outlines
+    addressField.value = window.pinMainMove.getCurrentPosition(mainPin);
+    mainPin.addEventListener('keydown', cbBindedEnter);
+    window.pinMainMove.activateInterfaceOnPinDown();
     window.validity.resetOutline();
   };
 
   // Prepare interface after page is loaded
   var setDefaultInterface = function () {
     // Set min price
-    window.validity.setMinPriceLimit(priceInput, typeInput);
     // Deny type text in address input
-    addressField.setAttribute('readonly', '');
     // Set default position of map pin in address input (Round pin)
-    addressField.value = window.pinMain.getCurrentPosition(mainPin);
     // Disable form elements for adding new advert
-    window.visibility.disableFromElements(mainFrom, ['input', 'select', 'textarea', 'button']);
     // Disable form elements in filter
+    window.validity.setMinPriceLimit(priceInput, typeInput);
+    addressField.setAttribute('readonly', '');
+    addressField.value = window.pinMainMove.getCurrentPosition(mainPin);
+    window.visibility.disableFromElements(mainFrom, ['input', 'select', 'textarea', 'button']);
     window.visibility.disableFromElements(mapFilterForm, ['input', 'select']);
   };
 

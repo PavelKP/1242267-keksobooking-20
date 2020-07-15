@@ -135,18 +135,18 @@ window.validity = (function () {
   // Success handler for data loading
   var onSuccessUpload = function () {
     // Reset form
-    mainFrom.reset();
     // Set interface to default state
-    window.interface.shutInterface();
     // Show popup with success message
+    mainFrom.reset();
+    window.interface.shutInterface();
     window.utils.showMessagePopup(null, 'success');
   };
 
   // Error handler for data loading
   var onErrorUpload = function (errorMessage) {
     // Show popup with error
-    window.utils.showMessagePopup(errorMessage, 'error');
     // Enable submit button
+    window.utils.showMessagePopup(errorMessage, 'error');
     submit.disabled = false;
   };
 

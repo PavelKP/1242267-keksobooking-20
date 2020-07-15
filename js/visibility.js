@@ -1,9 +1,8 @@
 'use strict';
 
 window.visibility = (function () {
-  // Find map
+  // Find HTML elements
   var map = document.querySelector('.map');
-  // Find main form for adding new advert
   var mainForm = document.querySelector('.ad-form');
 
   // Show or hide blocks
@@ -22,8 +21,8 @@ window.visibility = (function () {
     // Go throw tagArray
     for (var i = 0; i < tagArray.length; i++) {
       // Make array from nodeList
-      var nodeListArray = Array.from(form.querySelectorAll(tagArray[i]));
       // Add array to controlArray
+      var nodeListArray = Array.from(form.querySelectorAll(tagArray[i]));
       controlArray = controlArray.concat(nodeListArray);
     }
 

@@ -65,19 +65,19 @@ window.utils = (function () {
   // Show popup if message appears
   var showMessagePopup = function (errorMessage, type) {
     // Find map pin
-    var mainPin = document.querySelector('.map__pin--main');
     // Disable pin button
+    var mainPin = document.querySelector('.map__pin--main');
     mainPin.disabled = true;
 
     if (type !== 'error' && type !== 'success') {
       throw new Error('указан неправильный тип сообщения');
     }
-    // Find container
+    // Find HTML elements
     var mainContainer = document.querySelector('main');
-    // Find error popup template
     var template = document.querySelector('#' + type)
       .content
       .querySelector('.' + type);
+
     // Clone template node
     var templateClone = template.cloneNode(true);
 

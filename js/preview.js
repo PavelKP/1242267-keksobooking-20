@@ -9,11 +9,10 @@ window.preview = (function () {
 
     fileChooser.addEventListener('change', function () {
       // Choose first file
-      var file = fileChooser.files[0];
       // Chose file name and convert to lower case
-      var fileName = file.name.toLowerCase();
-
       // If end of file matches with any el from FILE_TYPES return true
+      var file = fileChooser.files[0];
+      var fileName = file.name.toLowerCase();
       var matches = FILE_TYPES.some(function (type) {
         return fileName.endsWith(type);
       });
