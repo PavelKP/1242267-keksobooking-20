@@ -6,12 +6,12 @@ window.visibility = (function () {
   var mainForm = document.querySelector('.ad-form');
 
   // Show or hide blocks
-  var changeVisibility = function () {
+  var toggleVisibility = function () {
     map.classList.toggle('map--faded');
     mainForm.classList.toggle('ad-form--disabled');
   };
 
-  var disableFromElements = function (form, tagArray, flag) {
+  var disableFormElements = function (form, tagArray, flag) {
     // check existence of flag
     if (flag === undefined) {
       flag = true;
@@ -35,8 +35,8 @@ window.visibility = (function () {
   };
 
   return {
-    disableFromElements: disableFromElements,
-    changeVisibility: changeVisibility
+    disableFormElements: disableFormElements,
+    toggleVisibility: toggleVisibility
   };
 
 })();

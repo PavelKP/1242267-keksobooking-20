@@ -113,9 +113,9 @@ window.interface = (function () {
     // Remove hiding classes
     // Set up pins on the map
     // Set coordinates value in address input (Sharp pin)
-    window.visibility.disableFromElements(mainFrom, ['input', 'select', 'textarea', 'button'], false);
-    window.visibility.disableFromElements(mapFilterForm, ['input', 'select'], false);
-    window.visibility.changeVisibility();
+    window.visibility.disableFormElements(mainFrom, ['input', 'select', 'textarea', 'button'], false);
+    window.visibility.disableFormElements(mapFilterForm, ['input', 'select'], false);
+    window.visibility.toggleVisibility();
     window.advertPins.fillPinContainer(pinTemplate, data, pinContainer);
     // The last argument of getCurrentPosition() is length of sharp tail
     addressField.value = window.pinMainMove.getCurrentPosition(mainPin, 22);
@@ -134,9 +134,9 @@ window.interface = (function () {
     // Stop main pin movement
     // Set default main pin position
     // Recalculate and set coordinates (without tail)
-    window.visibility.disableFromElements(mainFrom, ['input', 'select', 'textarea', 'button'], true);
-    window.visibility.disableFromElements(mapFilterForm, ['input', 'select'], true);
-    window.visibility.changeVisibility();
+    window.visibility.disableFormElements(mainFrom, ['input', 'select', 'textarea', 'button'], true);
+    window.visibility.disableFormElements(mapFilterForm, ['input', 'select'], true);
+    window.visibility.toggleVisibility();
     window.advertPins.clearPinContainer(pinContainer);
     window.pinMainMove.stopMainPinMove();
     window.pinMainMove.setDefaultPosition();
@@ -180,8 +180,8 @@ window.interface = (function () {
     window.validity.setMinPriceLimit(priceInput, typeInput);
     addressField.setAttribute('readonly', '');
     addressField.value = window.pinMainMove.getCurrentPosition(mainPin);
-    window.visibility.disableFromElements(mainFrom, ['input', 'select', 'textarea', 'button']);
-    window.visibility.disableFromElements(mapFilterForm, ['input', 'select']);
+    window.visibility.disableFormElements(mainFrom, ['input', 'select', 'textarea', 'button']);
+    window.visibility.disableFormElements(mapFilterForm, ['input', 'select']);
   };
 
   // Bind key checking functions and load() function
