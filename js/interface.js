@@ -3,6 +3,7 @@
 window.interface = (function () {
   // Interface isn't started
   var flag;
+  var startOnEnter;
 
   // Find HTML elements
   var mainPin = document.querySelector('.map__pin--main');
@@ -39,19 +40,27 @@ window.interface = (function () {
       // Check data format
       var data = JSON.parse(rawResult);
     } catch (err) {
-      // Bind error message to callback function
-      onPinMouseup = onPinMouseup.bind(null, 'Получен некорректный JSON: ' + err.message, 'error');
-      // Show error after mouseup event only
-      // It is needed only after click on main pin
-      // Use listener on mouseup because:
-      // on mouse down data is downloading and after error showMessagePopup() starts
-      // function sets 'click' listener on document to close popup
-      // at this moment click has already started, because mouse is down
-      // on mouse up finishes click and popup will close immediately
-      // Start error function after mouseup only
 
-      mainPin.addEventListener('mouseup', onPinMouseup);
-      // if error is caught, we won't run interface
+      // if no Enter
+      if (!startOnEnter) {
+        // Bind error message to callback function
+        // Reset interface flag
+        onPinMouseup = onPinMouseup.bind(null, 'Получен некорректный JSON: ' + err.message, 'error');
+        window.interface.flag = false;
+        // Show error after mouseup event only
+        // It is needed only after click on main pin
+        // Use listener on mouseup because:
+        // on mouse down data is downloading and after error showMessagePopup() starts
+        // function sets 'click' listener on document to close popup
+        // at this moment click has already started, because mouse is down
+        // on mouse up finishes click and popup will close immediately
+        // Start error function after mouseup only
+        mainPin.addEventListener('mouseup', onPinMouseup);
+        // if error is caught, we won't run interface
+      } else {
+        window.utils.showMessagePopup('Получен некорректный JSON: ' + err.message, 'error');
+        startOnEnter = false; // reset flag
+      }
     }
 
     // Check twice to remain in try/catch only JSON checking
@@ -77,6 +86,7 @@ window.interface = (function () {
     // It is needed only after click on main pin
     onPinMouseup = onPinMouseup.bind(null, message);
     mainPin.addEventListener('mouseup', onPinMouseup);
+    window.interface.flag = false; // Reset interface flag
   };
 
   // Handle bad server response - on enter
@@ -108,6 +118,7 @@ window.interface = (function () {
   // Collect and run all functions to start interface
   var startInterface = function (data) {
     window.interface.flag = true;
+    mainPin.disabled = false; // Activate pin
 
     // Remove disable attributes from form elements
     // Remove hiding classes
@@ -187,8 +198,15 @@ window.interface = (function () {
   // Bind key checking functions and load() function
   // -- evt object from listener will be the last arg in .bind()
   // -- without cb in apart variable I can't remove listener
-  var cbBindedEnter = window.utils.isEnterDown.bind(null, window.server.load.bind(null, window.constants.SERVER_URL_RECEIVE, onErrorLoadEnter, onSuccessLoad)
-  );
+  var cbBindedEnter = function (evt) {
+    mainPin.disabled = true; // if slow 3G we can't run data loading more than 1 time
+    startOnEnter = true;
+    window.utils.isEnterDown(
+        window.server.load.bind(
+            null, window.constants.SERVER_URL_RECEIVE, onErrorLoadEnter, onSuccessLoad
+        ),
+        evt);
+  };
 
   // Prepare interface on press "Enter"
   var activateInterfaceOnPinEnter = function () {

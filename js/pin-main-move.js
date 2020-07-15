@@ -147,6 +147,8 @@ window.pinMainMove = (function () {
     // If interface is switched off
     // load data and start interface after data loading
     if (!window.interface.flag) {
+      // Toggle flag (if slow 3G we can't run data loading more than 1 time)
+      window.interface.flag = true;
       window.server.load(window.constants.SERVER_URL_RECEIVE, window.interface.onErrorLoadMouse, window.interface.onSuccessLoad);
     }
   };
