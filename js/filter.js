@@ -39,9 +39,6 @@ window.filter = (function () {
         return control.value;
       });
 
-      // Iterate throw array
-      //	controls.forEach(function (el) {
-
       var comparePrice = function (number, type) {
         var result;
         switch (type) {

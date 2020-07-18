@@ -129,7 +129,7 @@ window.interface = (function () {
     window.visibility.toggleVisibility();
     window.advertPins.fillPinContainer(pinTemplate, data, pinContainer);
     // The last argument of getCurrentPosition() is length of sharp tail
-    addressField.value = window.pinMainMove.getCurrentPosition(mainPin, 22);
+    addressField.value = window.elementMove.getCurrentPosition(mainPin, 22);
 
     // Remove listeners - press Enter on MainPin and start interface only one time
     mainPin.removeEventListener('keydown', cbBindedEnter);
@@ -149,9 +149,9 @@ window.interface = (function () {
     window.visibility.disableFormElements(mapFilterForm, ['input', 'select'], true);
     window.visibility.toggleVisibility();
     window.advertPins.clearPinContainer(pinContainer);
-    window.pinMainMove.stopMainPinMove();
-    window.pinMainMove.setDefaultPosition();
-    addressField.value = window.pinMainMove.getCurrentPosition(mainPin);
+    window.elementMove.stopMove();
+    window.elementMove.setDefaultPosition();
+    addressField.value = window.elementMove.getCurrentPosition(mainPin);
 
     // Remove click handler from pin container
     // Get cb from global scope
@@ -168,16 +168,18 @@ window.interface = (function () {
     }
 
     // Reset forms
+    // Set default placeholder for price input
     filterForm.reset();
     mainFrom.reset();
+    window.validity.setMinPriceLimit(priceInput, typeInput);
 
     // Set default position of map pin in address input (Round pin)
     // Prepare interface to activate on press "Enter"
     // Prepare interface to activate on mousedown + add pin movement
     // Reset form element outlines
-    addressField.value = window.pinMainMove.getCurrentPosition(mainPin);
+    addressField.value = window.elementMove.getCurrentPosition(mainPin);
     mainPin.addEventListener('keydown', cbBindedEnter);
-    window.pinMainMove.activateInterfaceOnPinDown();
+    window.elementMove.activateInterfaceOnPinDown();
     window.validity.resetOutline();
   };
 
@@ -190,7 +192,7 @@ window.interface = (function () {
     // Disable form elements in filter
     window.validity.setMinPriceLimit(priceInput, typeInput);
     addressField.setAttribute('readonly', '');
-    addressField.value = window.pinMainMove.getCurrentPosition(mainPin);
+    addressField.value = window.elementMove.getCurrentPosition(mainPin);
     window.visibility.disableFormElements(mainFrom, ['input', 'select', 'textarea', 'button']);
     window.visibility.disableFormElements(mapFilterForm, ['input', 'select']);
   };

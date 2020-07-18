@@ -18,8 +18,8 @@ window.validity = (function () {
   var formWithOutlineArray = [roomNumberInput, capacityInput, priceInput, titleInput];
   // Remove all outlines
   var resetOutline = function () {
-    formWithOutlineArray.forEach(function (el) {
-      el.style.outline = 'none';
+    formWithOutlineArray.forEach(function (input) {
+      input.style.outline = 'none';
     });
   };
 

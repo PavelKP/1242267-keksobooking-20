@@ -1,6 +1,6 @@
 'use strict';
 
-window.pinMainMove = (function () {
+window.elementMove = (function () {
   // Dimensions of mainPin
   var PIN_HEIGHT = 87;
   var PIN_WIDTH = 65;
@@ -162,7 +162,7 @@ window.pinMainMove = (function () {
   };
 
   // Stop main pin movement on mouse down
-  var stopMainPinMove = function () {
+  var stopMove = function () {
     mainPin.removeEventListener('mousedown', onMouseDown);
   };
   // Set default main pin position
@@ -173,7 +173,7 @@ window.pinMainMove = (function () {
 
   return {
     activateInterfaceOnPinDown: activateInterfaceOnPinDown,
-    stopMainPinMove: stopMainPinMove,
+    stopMove: stopMove,
     setDefaultPosition: setDefaultPosition,
     getCurrentPosition: getCurrentPosition
   };
