@@ -1,22 +1,44 @@
 'use strict';
 
 window.pinMainMove = (function () {
-  // Height of mainPin
+  // Dimensions of mainPin
   var PIN_HEIGHT = 87;
-  // Width of mainPin
   var PIN_WIDTH = 65;
 
-  // mainPin default left
+  // mainPin default position
   var PIN_LEFT_DEFAULT = 570;
-  // mainPin default top
   var PIN_TOP_DEFAULT = 375;
 
-  // Find map pin
+  // Find HTML elements
   var mainPin = document.querySelector('.map__pin--main');
-  // Find map
   var map = document.querySelector('.map');
-  // - address input
   var addressField = document.querySelector('#address');
+
+  // Get current Pin position
+  var getCurrentPosition = function (pinBlock, sharpTail) {
+    // Get current coordinates (left and top indents from parent)
+    var leftIndent = pinBlock.offsetLeft;
+    var topIndent = pinBlock.offsetTop;
+
+    // Half of round pin part
+    var leftOffset = pinBlock.offsetWidth / 2;
+    var topOffset;
+    // Check existence of sharp tail
+    if (sharpTail) {
+      // Offset = the whole height + tail
+      topOffset = pinBlock.offsetHeight + sharpTail;
+    } else {
+      // Offset = center
+      topOffset = pinBlock.offsetHeight / 2;
+    }
+
+    // Add offsets and round
+    // Round floor because left offset is fractional, and left point must be zero
+    var coordX = Math.floor(leftIndent + leftOffset);
+    var coordY = Math.round(topIndent + topOffset);
+
+    return coordX + ', ' + coordY;
+  };
 
   // Define empty variables, all functions can use it like a buffer
   var startCoords = {};
@@ -61,7 +83,7 @@ window.pinMainMove = (function () {
     // We can set style.top >= bottom boundary(limit)
     if (newPinPosTop >= botLimit) {
       newPinPosTop = botLimit;
-    // Pin won't move if cursor is under boundary + offset
+      // Pin won't move if cursor is under boundary + offset
     } else if (startCoords.y > botLimit + pinBottomOffset) {
       newPinPosTop = botLimit;
     }
@@ -96,7 +118,7 @@ window.pinMainMove = (function () {
     mainPin.style.left = newPinPosLeft + 'px';
 
     // Set new coordinates in form (address field) on mouse move
-    addressField.value = window.pinMain.getCurrentPosition(mainPin, 22);
+    addressField.value = getCurrentPosition(mainPin, 22);
   };
 
   // When mouse button is up, movement stops
@@ -104,11 +126,10 @@ window.pinMainMove = (function () {
     UpEvt.preventDefault();
 
     // Remove event listeners and stop pin moving
+    // Set new coordinates in form (address field) on mouse up
     document.removeEventListener('mousemove', onMouseMove);
     document.removeEventListener('mouseup', onMouseUp);
-
-    // Set new coordinates in form (address field) on mouse up
-    addressField.value = window.pinMain.getCurrentPosition(mainPin, 22);
+    addressField.value = getCurrentPosition(mainPin, 22);
   };
 
   // Callback to start move main pin
@@ -122,12 +143,24 @@ window.pinMainMove = (function () {
 
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
+
+    // If interface is switched off
+    // load data and start interface after data loading
+    if (!window.interface.flag) {
+      // Toggle flag (if slow 3G we can't run data loading more than 1 time)
+      window.interface.flag = true;
+      window.server.load(window.constants.SERVER_URL_RECEIVE, window.interface.onErrorLoadMouse, window.interface.onSuccessLoad);
+    }
   };
 
+  // Add mouse button checking to callback (only left button)
+  onMouseDown = window.utils.isMouseLeftDown.bind(null, onMouseDown);
+
   // Start main pin movement on mouse down
-  var activateMainPinMove = function () {
+  var activateInterfaceOnPinDown = function () {
     mainPin.addEventListener('mousedown', onMouseDown);
   };
+
   // Stop main pin movement on mouse down
   var stopMainPinMove = function () {
     mainPin.removeEventListener('mousedown', onMouseDown);
@@ -139,9 +172,10 @@ window.pinMainMove = (function () {
   };
 
   return {
-    activateMainPinMove: activateMainPinMove,
+    activateInterfaceOnPinDown: activateInterfaceOnPinDown,
     stopMainPinMove: stopMainPinMove,
-    setDefaultPosition: setDefaultPosition
+    setDefaultPosition: setDefaultPosition,
+    getCurrentPosition: getCurrentPosition
   };
 
 })();

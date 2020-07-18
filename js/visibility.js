@@ -1,18 +1,17 @@
 'use strict';
 
 window.visibility = (function () {
-  // Find map
+  // Find HTML elements
   var map = document.querySelector('.map');
-  // Find main form for adding new advert
   var mainForm = document.querySelector('.ad-form');
 
   // Show or hide blocks
-  var changeVisibility = function () {
+  var toggleVisibility = function () {
     map.classList.toggle('map--faded');
     mainForm.classList.toggle('ad-form--disabled');
   };
 
-  var disableFromElements = function (form, tagArray, flag) {
+  var disableFormElements = function (form, tagArray, flag) {
     // check existence of flag
     if (flag === undefined) {
       flag = true;
@@ -22,8 +21,8 @@ window.visibility = (function () {
     // Go throw tagArray
     for (var i = 0; i < tagArray.length; i++) {
       // Make array from nodeList
-      var nodeListArray = Array.from(form.querySelectorAll(tagArray[i]));
       // Add array to controlArray
+      var nodeListArray = Array.from(form.querySelectorAll(tagArray[i]));
       controlArray = controlArray.concat(nodeListArray);
     }
 
@@ -36,8 +35,8 @@ window.visibility = (function () {
   };
 
   return {
-    disableFromElements: disableFromElements,
-    changeVisibility: changeVisibility
+    disableFormElements: disableFormElements,
+    toggleVisibility: toggleVisibility
   };
 
 })();

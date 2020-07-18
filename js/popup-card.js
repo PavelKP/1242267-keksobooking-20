@@ -8,10 +8,10 @@ window.popupCard = (function () {
 
     for (var i = 0; i < data.length; i++) {
       // Clone element
-      var elementClone = element.cloneNode(true);
       // Write src
-      elementClone.src = data[i];
       // Append to fragment
+      var elementClone = element.cloneNode(true);
+      elementClone.src = data[i];
       fragment.appendChild(elementClone);
     }
     // remove initial template element
@@ -22,21 +22,20 @@ window.popupCard = (function () {
   // Return fragment with element (by creating <li>)
   var createList = function (data) {
     // Create empty fragment
-    var fragment = document.createDocumentFragment();
     // Define basic class
+    var fragment = document.createDocumentFragment();
     var basicClass = 'popup__feature';
 
     // Create New Element
-    var templateElement = document.createElement('li');
     // Add basic class
+    var templateElement = document.createElement('li');
     templateElement.classList.add(basicClass);
 
     for (var i = 0; i < data.length; i++) {
       var feature = data[i];
 
       var newElement = templateElement.cloneNode(true);
-      // Add class modifier
-      newElement.classList.add(basicClass + '--' + feature);
+      newElement.classList.add(basicClass + '--' + feature); // Add class modifier
       newElement.textContent = feature;
 
       fragment.appendChild(newElement);
@@ -49,8 +48,7 @@ window.popupCard = (function () {
     if (textData) {
       element.textContent = textData;
     } else {
-      // Hide element
-      element.hidden = true;
+      element.hidden = true; // Hide element
     }
   };
 
@@ -72,17 +70,18 @@ window.popupCard = (function () {
     var avatar = card.querySelector('.popup__avatar');
 
     // Add title
-    addTextAndCheck(title, data.offer.title);
     // Add address
-    addTextAndCheck(address, data.offer.address);
     // Add price
-    addTextAndCheck(price, data.offer.price);
     // Add price units
-    price.insertAdjacentHTML('beforeend', ' ' + window.constants.PRICE_UNITS);
     // Add type of accommodation - use constant library to translate text
-    addTextAndCheck(type, window.constants.TYPE_AND_PRICE_LIBRARY[data.offer.type].translation);
     // Add description
+    addTextAndCheck(title, data.offer.title);
+    addTextAndCheck(address, data.offer.address);
+    addTextAndCheck(price, data.offer.price);
+    price.insertAdjacentHTML('beforeend', ' ' + window.constants.PRICE_UNITS);
+    addTextAndCheck(type, window.constants.TYPE_AND_PRICE_LIBRARY[data.offer.type].translation);
     addTextAndCheck(description, data.offer.description);
+
     // Add capacity
     if (data.offer.rooms && data.offer.guests) {
       capacity.textContent = data.offer.rooms + ' комнаты для ' + data.offer.guests + ' гостей';
@@ -111,8 +110,7 @@ window.popupCard = (function () {
       photosContainer.appendChild(addCopyElements(photosContainer, photoItem, data.offer.photos));
     } else {
       photosContainer.hidden = true;
-      // img alt can't be hidden if I hide only parent (?)
-      photosContainer.children[0].hidden = true;
+      photosContainer.children[0].hidden = true; // img alt can't be hidden if I hide only parent (?)
     }
 
     // Add avatar
@@ -126,11 +124,9 @@ window.popupCard = (function () {
     return card;
   };
 
-  // Find map
+  // Find HTML elements
   var map = document.querySelector('.map');
-  // Find pin container
   var pinContainer = document.querySelector('.map__pins');
-  // Find card template
   var cardTemplate = document.querySelector('#card')
   .content
   .querySelector('.map__card');
@@ -138,16 +134,44 @@ window.popupCard = (function () {
   // Close popup
   var closePopup = function () {
     // Find actual popup element
-    var popup = map.querySelector('.map__card');
     // Hide card
-    popup.hidden = true;
     // Remove ESC listener from document
+    // Remove pressed style from pin
+    var popup = map.querySelector('.map__card');
+    popup.hidden = true;
     document.removeEventListener('keydown', onPopupEscPress);
+    removePinPressed();
   };
 
   // Callback to invoke closePopup() on ESC down
   var onPopupEscPress = function (evt) {
     window.utils.isEscDown(closePopup, evt);
+  };
+
+  // Remove pressed style from pin
+  var removePinPressed = function () {
+    // Find pressed pin
+    var pressedPin = pinContainer.querySelector('.map__pin--active');
+    // If pressed pin exists
+    if (pressedPin) {
+      // Remove pressed class
+      pressedPin.classList.remove('map__pin--active');
+    }
+  };
+
+  // Add pressed style on pin
+  var makePinPressed = function (evt, type) {
+    // Remove pressed style from previous pin
+    removePinPressed();
+    if (type === 'parent') {
+      // Add pressed style to parent node
+      evt.target.parentNode.classList.add('map__pin--active');
+    } else if (type === 'node') {
+      // Add pressed style to curent node (in evt)
+      evt.target.classList.add('map__pin--active');
+    } else {
+      throw new Error('Wrong type in function makePinPressed()');
+    }
   };
 
   // Show card - fetch card from array by id, put it in HTML, add listeners
@@ -156,11 +180,16 @@ window.popupCard = (function () {
     var id;
     if (evt.target && evt.target.matches('.map__pin:not(.map__pin--main) img')) {
       // Find id in parent element
+      // Add pressed style on current pin (to parent node)
       id = evt.target.parentNode.dataset.id;
+      makePinPressed(evt, 'parent');
+
       // Catch click on button (not in main pin)
     } else if (evt.target && evt.target.matches('.map__pin:not(.map__pin--main)')) {
       // Find id in target element
+      // Add pressed style on current pin (to current node)
       id = evt.target.dataset.id;
+      makePinPressed(evt, 'node');
     }
     // Find a temporary element or previous created card
     var previous = map.querySelector('.map__card');
@@ -168,10 +197,10 @@ window.popupCard = (function () {
     // If we click on pin--main, id will be empty
     if (id) {
       // Add card before .map__filters-container block
-      map.replaceChild(createCard(cardTemplate, data[id]), previous);
       // Find popup close button
-      var popupCloseButton = map.querySelector('.popup__close');
       // Add listener to close popup when click on button "X"
+      map.replaceChild(createCard(cardTemplate, data[id]), previous);
+      var popupCloseButton = map.querySelector('.popup__close');
       popupCloseButton.addEventListener('click', function () {
         closePopup();
       });
@@ -183,22 +212,22 @@ window.popupCard = (function () {
 
   // Create empty element for replacement with real card
   var createTempCard = function () {
-    var temporaryElement = document.createElement('article');
+    // Create empty element
     // Add className the same as a real card className
-    temporaryElement.className = 'map__card';
     // Hide element (it gets CSS rules and looks bad)
-    temporaryElement.style.display = 'none';
     // Put element before .map__filters-container block
+    var temporaryElement = document.createElement('article');
+    temporaryElement.className = 'map__card';
+    temporaryElement.style.display = 'none';
     map.insertBefore(temporaryElement, map.children[1]);
   };
 
   var onPinClick = function (data) {
     // Create temporary card
-    createTempCard(map);
-    // Bind cb with data
-    // I need apart cb to remove listener later
-    var onPinClickBinded = showCard.bind(null, data);
+    // Bind cb with data (I need apart cb to remove listener later)
     // Render card when click on pin
+    createTempCard(map);
+    var onPinClickBinded = showCard.bind(null, data);
     pinContainer.addEventListener('click', onPinClickBinded);
 
     // return binded cb

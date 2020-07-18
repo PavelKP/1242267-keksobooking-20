@@ -1,6 +1,37 @@
 'use strict';
 
 window.validity = (function () {
+  // ----------- Form elements ------------//
+  // Find form for adding new advert
+  var mainFrom = document.querySelector('.ad-form');
+  var roomNumberInput = mainFrom.querySelector('#room_number');
+  var capacityInput = mainFrom.querySelector('#capacity');
+  var submit = mainFrom.querySelector('.ad-form__submit');
+  var typeInput = mainFrom.querySelector('#type');
+  var priceInput = mainFrom.querySelector('#price');
+  var timeInInput = mainFrom.querySelector('#timein');
+  var timeOutInput = mainFrom.querySelector('#timeout');
+  var titleInput = mainFrom.querySelector('#title');
+  var resButton = document.querySelector('.ad-form__reset');
+
+
+  var formWithOutlineArray = [roomNumberInput, capacityInput, priceInput, titleInput];
+  // Remove all outlines
+  var resetOutline = function () {
+    formWithOutlineArray.forEach(function (el) {
+      el.style.outline = 'none';
+    });
+  };
+
+  // Show red outline if form is invalid
+  var setRedOutline = function (element) {
+    if (element.validity.customError) {
+      element.style.outline = '4px solid red';
+    } else {
+      element.style.outline = 'none';
+    }
+  };
+
   // Set dynamic price placeholder and minimum limit
   var setMinPriceLimit = function (recipient, donorInput) {
     // Take a min price from library
@@ -37,6 +68,9 @@ window.validity = (function () {
     // Force fire validity event
     roomNumber.reportValidity();
     capacity.reportValidity();
+    // Show red outline if invalid
+    setRedOutline(roomNumber);
+    setRedOutline(capacity);
   };
 
   // Make checkin=checkout and vice versa
@@ -68,7 +102,9 @@ window.validity = (function () {
       element.setCustomValidity('');
     }
     // Force fire validity event
+    // Show red outline if invalid
     element.reportValidity();
+    setRedOutline(element);
   };
 
   // Live text input validation
@@ -91,56 +127,36 @@ window.validity = (function () {
       element.setCustomValidity('');
     }
     // Force fire validity event
+    // Show red outline if invalid
     element.reportValidity();
+    setRedOutline(element);
   };
-
-  // ----------- Form elements ------------//
-  // Find form for adding new advert
-  var mainFrom = document.querySelector('.ad-form');
-  // Find filter in map
-  var roomNumber = mainFrom.querySelector('#room_number');
-  // Find room capacity input
-  var capacity = mainFrom.querySelector('#capacity');
-  // Find submit form button
-  var submit = mainFrom.querySelector('.ad-form__submit');
-  // Find accommodation type input
-  var typeInput = mainFrom.querySelector('#type');
-  // Find min price input
-  var priceInput = mainFrom.querySelector('#price');
-  // Find checkin time select
-  var timeInInput = mainFrom.querySelector('#timein');
-  // Find checkout time select
-  var timeOutInput = mainFrom.querySelector('#timeout');
-  // Find title input
-  var titleInput = mainFrom.querySelector('#title');
-  // Find reset button
-  var resButton = document.querySelector('.ad-form__reset');
 
   // Success handler for data loading
   var onSuccessUpload = function () {
     // Reset form
-    mainFrom.reset();
     // Set interface to default state
-    window.interface.shutInterface();
     // Show popup with success message
+    mainFrom.reset();
+    window.interface.shutInterface();
     window.utils.showMessagePopup(null, 'success');
   };
 
   // Error handler for data loading
   var onErrorUpload = function (errorMessage) {
     // Show popup with error
-    window.utils.showMessagePopup(errorMessage, 'error');
     // Enable submit button
+    window.utils.showMessagePopup(errorMessage, 'error');
     submit.disabled = false;
   };
 
   // If change room number check condition
-  roomNumber.addEventListener('change', function () {
-    compareRoomsAndCapacity(roomNumber, capacity);
+  roomNumberInput.addEventListener('change', function () {
+    compareRoomsAndCapacity(roomNumberInput, capacityInput);
   });
   // If change capacity check condition
-  capacity.addEventListener('change', function () {
-    compareRoomsAndCapacity(roomNumber, capacity);
+  capacityInput.addEventListener('change', function () {
+    compareRoomsAndCapacity(roomNumberInput, capacityInput);
   });
   // If change accommodation type - change price limit, validate price
   typeInput.addEventListener('change', function () {
@@ -169,7 +185,7 @@ window.validity = (function () {
   // Add listener to reset button - for what???
   resButton.addEventListener('click', function (evt) {
     evt.preventDefault();
-    mainFrom.reset();
+    window.interface.shutInterface();
   });
 
   // It is needed if we don't change any control
@@ -179,7 +195,7 @@ window.validity = (function () {
     // Else we get native browser validation message
     validateInputTextLive(titleInput);
     validateInputNumber(priceInput);
-    compareRoomsAndCapacity(roomNumber, capacity);
+    compareRoomsAndCapacity(roomNumberInput, capacityInput);
 
     // Prevent page reloading
     evt.preventDefault();
@@ -195,7 +211,8 @@ window.validity = (function () {
   });
 
   return {
-    setMinPriceLimit: setMinPriceLimit
+    setMinPriceLimit: setMinPriceLimit,
+    resetOutline: resetOutline
   };
 
 })();

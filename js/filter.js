@@ -1,14 +1,14 @@
 'use strict';
 
 window.filter = (function () {
-  // Find pin container
+  // Find HTML elements
   var pinContainer = document.querySelector('.map__pins');
-  // Find pin template
+  var filterForm = document.querySelector('.map__filters');
+
+  // Find template
   var pinTemplate = document.querySelector('#pin')
     .content
     .querySelector('.map__pin');
-  // Find filter form
-  var filterForm = document.querySelector('.map__filters');
 
   // Set filter to filter form
   var addToForm = function (data) {
@@ -16,14 +16,14 @@ window.filter = (function () {
     // Render pins sorted by changed control
     var onFilterFormChange = function () {
       // Find Popup
-      var popup = document.querySelector('.map__card');
       // Hide popup
+      var popup = document.querySelector('.map__card');
       popup.hidden = true;
 
       // Clear pin container
-      window.pinsAdvert.clearPinContainer(pinContainer);
       // Remove click handler from pin container
       // Get cb from global scope
+      window.advertPins.clearPinContainer(pinContainer);
       pinContainer.removeEventListener('click', window.cb);
 
       // Copy data array
@@ -91,10 +91,10 @@ window.filter = (function () {
               if (control.id === 'housing-price') {
                 // compare price in data with control gradation
                 return comparePrice(advert.offer.price, control.value);
-              // if change features find checked input value in data
+                // if change features find checked input value in data
               } else if (control.name === 'features') {
                 return advert.offer.features.includes(control.value);
-              // if change anything else control
+                // if change anything else control
               } else {
                 // Cast type to number or string
                 return advert.offer[dataFieldMap[control.id]] === castType(control.value);
@@ -105,10 +105,9 @@ window.filter = (function () {
       };
 
       // Filter data
-      filterData();
-
       // Set up pins on the map using filtered data
-      window.pinsAdvert.fillPinContainer(pinTemplate, dataCopy, pinContainer);
+      filterData();
+      window.advertPins.fillPinContainer(pinTemplate, dataCopy, pinContainer);
     };
 
     var onFilterFormChangeDebounced = window.debounce(onFilterFormChange);

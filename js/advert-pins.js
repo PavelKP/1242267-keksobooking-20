@@ -1,6 +1,6 @@
 'use strict';
 
-window.pinsAdvert = (function () {
+window.advertPins = (function () {
 
   // Count offset for pin
   var countOffset = function (axis) {
@@ -37,8 +37,23 @@ window.pinsAdvert = (function () {
     var pinFragment = document.createDocumentFragment();
 
     for (var i = 0; i < data.length; i++) {
-      var pinElement = createPin(template, data, i);
-      pinFragment.appendChild(pinElement);
+      // Render only <= 5 pins
+      if (i < window.constants.MAX_ADVERT_AMOUNT) {
+
+        // If no offer property in data objet
+        if (!data[i].offer) {
+          // miss this pin
+          continue;
+        }
+
+        // Create single pin
+        var pinElement = createPin(template, data, i);
+        // Add pin to fragment
+        pinFragment.appendChild(pinElement);
+      } else {
+        // Break cycle after five pins or less
+        break;
+      }
     }
 
     container.appendChild(pinFragment);
