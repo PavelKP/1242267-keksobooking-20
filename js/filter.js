@@ -26,14 +26,18 @@ window.filter = (function () {
       window.advertPins.clearPinContainer(pinContainer);
       pinContainer.removeEventListener('click', window.cb);
 
-      // Copy data array
-      var dataCopy = data.slice();
+      // Create empty array for filtered data
+      var dataFiltered = [];
 
       // Define all filter controls
       // - take only checked checkboxes
       var controls = filterForm.querySelectorAll('.map__filter, .map__checkbox:checked');
       // Convert nodeList to array
+      // Extract checked values
       controls = Array.from(controls);
+      var controlsChanged = controls.filter(function (control) {
+        return control.value;
+      });
 
       // Iterate throw array
       //	controls.forEach(function (el) {
@@ -47,7 +51,7 @@ window.filter = (function () {
             }
             break;
           case 'middle':
-            if (number > 10000 && number < 50000) {
+            if (number >= 10000 && number < 50000) {
               result = true;
             }
             break;
@@ -79,35 +83,54 @@ window.filter = (function () {
         }
       };
 
+      var compareValueWithData = function (advert, control) {
+        if (control.value === 'any') {
+          return true; // if no changes
+        } else if (control.name === 'housing-price') {
+          // compare price in data with control gradation
+          return comparePrice(advert.offer.price, control.value);
+          // if change features find checked input value in data
+        } else if (control.name === 'features') {
+          return advert.offer.features.includes(control.value);
+          // if change anything else control
+        } else {
+          // Cast type to number or string
+          return advert.offer[dataFieldMap[control.id]] === castType(control.value);
+        }
+
+      };
+
       // Filter data when control is changed
       var filterData = function () {
-        // Iterate throw array with form elements (selectors, checkboxes)
-        controls.forEach(function (control) {
-          // Filter data if form element has a value is different from 'any'
-          if (control.value !== 'any') {
-            // Filter data
-            dataCopy = dataCopy.filter(function (advert) {
-              // if change price
-              if (control.id === 'housing-price') {
-                // compare price in data with control gradation
-                return comparePrice(advert.offer.price, control.value);
-                // if change features find checked input value in data
-              } else if (control.name === 'features') {
-                return advert.offer.features.includes(control.value);
-                // if change anything else control
-              } else {
-                // Cast type to number or string
-                return advert.offer[dataFieldMap[control.id]] === castType(control.value);
-              }
-            });
+        // Clear array
+        dataFiltered = [];
+
+        for (var i = 0; i < data.length; i++) { // Iterate throw data
+          var advert = data[i];
+
+          for (var j = 0; j < controlsChanged.length; j++) { // Iterate throw controls
+            var control = controlsChanged[j];
+            var checked = compareValueWithData(advert, control); // Decide to remain data or not
+
+            if (!checked) {
+              break; // break cycle if we meet first false checking
+            }
           }
-        });
+
+          if (window.constants.MAX_ADVERT_AMOUNT <= i) {
+            break; // Show only 5 adverts
+          }
+
+          if (checked) {
+            dataFiltered.push(advert); // don't include data when checking is failed
+          }
+        }
       };
 
       // Filter data
       // Set up pins on the map using filtered data
       filterData();
-      window.advertPins.fillPinContainer(pinTemplate, dataCopy, pinContainer);
+      window.advertPins.fillPinContainer(pinTemplate, dataFiltered, pinContainer);
     };
 
     var onFilterFormChangeDebounced = window.debounce(onFilterFormChange);
