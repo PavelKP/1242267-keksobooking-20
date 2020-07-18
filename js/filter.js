@@ -42,17 +42,17 @@ window.filter = (function () {
       var comparePrice = function (number, type) {
         var result;
         switch (type) {
-          case 'low':
+          case window.constants.ControlValue.LOW:
             if (number < 10000) {
               result = true;
             }
             break;
-          case 'middle':
+          case window.constants.ControlValue.MIDDLE:
             if (number >= 10000 && number < 50000) {
               result = true;
             }
             break;
-          case 'high':
+          case window.constants.ControlValue.HIGH:
             if (number > 50000) {
               result = true;
             }
@@ -81,13 +81,13 @@ window.filter = (function () {
       };
 
       var compareValueWithData = function (advert, control) {
-        if (control.value === 'any') {
+        if (control.value === window.constants.ControlValue.ANY) {
           return true; // if no changes
-        } else if (control.name === 'housing-price') {
+        } else if (control.name === window.constants.ControlName.PRICE) {
           // compare price in data with control gradation
           return comparePrice(advert.offer.price, control.value);
           // if change features find checked input value in data
-        } else if (control.name === 'features') {
+        } else if (control.name === window.constants.ControlName.FEATURE) {
           return advert.offer.features.includes(control.value);
           // if change anything else control
         } else {

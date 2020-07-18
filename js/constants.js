@@ -42,6 +42,16 @@ window.constants = (function () {
     SERVER_URL_SEND: 'https://javascript.pages.academy/keksobooking',
     MAX_ADVERT_AMOUNT: 5,
     ERROR_POPUP_TIMEOUT: 1000, // 1 sec
-    DEFAULT_AVATAR_SRC: 'img/muffin-grey.svg'
+    DEFAULT_AVATAR_SRC: 'img/muffin-grey.svg',
+    ControlName: {
+      PRICE: 'housing-price',
+      FEATURE: 'features'
+    },
+    ControlValue: {
+      ANY: 'any',
+      LOW: 'low',
+      MIDDLE: 'middle',
+      HIGH: 'high'
+    }
   };
 })();
