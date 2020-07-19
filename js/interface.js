@@ -149,7 +149,7 @@ window.interface = (function () {
     window.visibility.disableFormElements(mapFilterForm, ['input', 'select'], true);
     window.visibility.toggleСlasses();
     window.advertPins.clearPinContainer(pinContainer);
-    window.elementMove.stopMove();
+    window.elementMove.stop();
     window.elementMove.setDefaultPosition();
     addressField.value = window.elementMove.getCurrentPosition(mainPin);
 

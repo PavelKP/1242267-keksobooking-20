@@ -162,7 +162,7 @@ window.elementMove = (function () {
   };
 
   // Stop main pin movement on mouse down
-  var stopMove = function () {
+  var stop = function () {
     mainPin.removeEventListener('mousedown', onMouseDown);
   };
   // Set default main pin position
@@ -173,7 +173,7 @@ window.elementMove = (function () {
 
   return {
     activateInterfaceOnPinDown: activateInterfaceOnPinDown,
-    stopMove: stopMove,
+    stop: stop,
     setDefaultPosition: setDefaultPosition,
     getCurrentPosition: getCurrentPosition
   };
