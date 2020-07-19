@@ -126,7 +126,7 @@ window.interface = (function () {
     // Set coordinates value in address input (Sharp pin)
     window.visibility.disableFormElements(mainFrom, ['input', 'select', 'textarea', 'button'], false);
     window.visibility.disableFormElements(mapFilterForm, ['input', 'select'], false);
-    window.visibility.toggleVisibility();
+    window.visibility.toggleСlasses();
     window.advertPins.fillPinContainer(pinTemplate, data, pinContainer);
     // The last argument of getCurrentPosition() is length of sharp tail
     addressField.value = window.elementMove.getCurrentPosition(mainPin, 22);
@@ -147,7 +147,7 @@ window.interface = (function () {
     // Recalculate and set coordinates (without tail)
     window.visibility.disableFormElements(mainFrom, ['input', 'select', 'textarea', 'button'], true);
     window.visibility.disableFormElements(mapFilterForm, ['input', 'select'], true);
-    window.visibility.toggleVisibility();
+    window.visibility.toggleСlasses();
     window.advertPins.clearPinContainer(pinContainer);
     window.elementMove.stopMove();
     window.elementMove.setDefaultPosition();
